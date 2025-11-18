@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { UserCircle, Envelope, IdentificationCard } from '@phosphor-icons/react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { UserCircle, Envelope, IdentificationCard, Info } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import type { Employee } from '@/lib/types';
+
+declare const spark: {
+  user: () => Promise<{ email: string }>;
+};
 
 interface AuthFormsProps {
   onLogin: (email: string, password: string) => void;
@@ -21,6 +26,7 @@ interface AuthFormsProps {
 
 export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [adminEmail, setAdminEmail] = useState('admin@hr-techpro.com');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,6 +38,21 @@ export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
     role: 'employee' as const,
     region: ''
   });
+
+  useEffect(() => {
+    const fetchAdminEmail = async () => {
+      try {
+        const user = await spark.user();
+        if (user.email) {
+          setAdminEmail(user.email);
+        }
+      } catch {
+        setAdminEmail('admin@hr-techpro.com');
+      }
+    };
+    
+    fetchAdminEmail();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,14 +89,31 @@ export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-primary mb-4">
-            <UserCircle size={40} weight="fill" className="text-white" />
+      <div className="w-full max-w-md space-y-4">
+        {isLogin && (
+          <Alert className="bg-accent/10 border-accent">
+            <Info size={20} className="text-accent" />
+            <AlertDescription className="text-sm">
+              <div className="font-semibold mb-2">معلومات تسجيل الدخول:</div>
+              <div className="space-y-1 text-xs">
+                <div><strong>المسؤول:</strong> {adminEmail}</div>
+                <div><strong>كلمة المرور:</strong> admin123</div>
+                <hr className="my-2 border-accent/20" />
+                <div><strong>موظف تجريبي:</strong> ahmed.said@company.com</div>
+                <div><strong>كلمة المرور:</strong> emp123</div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <Card className="p-8">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-primary mb-4">
+              <UserCircle size={40} weight="fill" className="text-white" />
+            </div>
+            <h1 className="text-3xl font-bold">HR-TechPro</h1>
+            <p className="text-muted-foreground mt-2">نظام إدارة الموظفين والحضور</p>
           </div>
-          <h1 className="text-3xl font-bold">HR-TechPro</h1>
-          <p className="text-muted-foreground mt-2">نظام إدارة الموظفين والحضور</p>
-        </div>
 
         <div className="flex gap-2 mb-6">
           <Button
@@ -201,7 +239,8 @@ export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
             </p>
           )}
         </form>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

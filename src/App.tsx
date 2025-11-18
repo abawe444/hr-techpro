@@ -57,6 +57,7 @@ import {
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatDate, formatTime, generateAITaskSuggestions, predictLateness, generateSmartRecommendation } from '@/lib/ai-helpers';
+import { createDefaultAdmin, SAMPLE_EMPLOYEES } from '@/lib/initial-data';
 import type {
   Employee,
   AttendanceRecord,
@@ -76,6 +77,7 @@ function App() {
   const [leaveRequestsRaw, setLeaveRequests] = useKV<LeaveRequest[]>('leaveRequests', []);
   const [payrollEntriesRaw, setPayrollEntries] = useKV<PayrollEntry[]>('payrollEntries', []);
   const [notificationsRaw, setNotifications] = useKV<Notification[]>('notifications', []);
+  const [initialized, setInitialized] = useKV<boolean>('app_initialized', false);
   
   const employees = employeesRaw ?? [];
   const attendanceRecords = attendanceRecordsRaw ?? [];
@@ -112,6 +114,34 @@ function App() {
     amount: '',
     reason: '',
   });
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      if (!initialized) {
+        try {
+          const defaultAdmin = await createDefaultAdmin();
+          
+          const initialEmployees: Employee[] = [
+            defaultAdmin,
+            ...SAMPLE_EMPLOYEES.map(emp => ({
+              ...emp,
+              isActive: true,
+              isPending: false,
+            }))
+          ];
+          
+          setEmployees(() => initialEmployees);
+          setInitialized(() => true);
+          
+          toast.success('تم تهيئة النظام بنجاح');
+        } catch (error) {
+          console.error('Error initializing app:', error);
+        }
+      }
+    };
+    
+    initializeApp();
+  }, [initialized, setEmployees, setInitialized]);
 
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'manager';
 
