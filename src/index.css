@@ -9,6 +9,12 @@
   body {
     font-family: 'Cairo', sans-serif;
     direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -94,5 +100,45 @@
   50% {
     transform: scale(1.2);
     opacity: 0.8;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --radius: 0.5rem;
+  }
+  
+  body {
+    font-size: 14px;
+  }
+}
+
+.notification-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, textarea, select {
+  font-size: 16px;
+}
+
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
   }
 }

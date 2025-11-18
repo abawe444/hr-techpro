@@ -419,6 +419,36 @@ function App() {
     };
     
     setNotifications((current) => [...(current ?? []), newNotif]);
+    
+    if (userId === currentUser?.id) {
+      const toastIcon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '🔔';
+      
+      if (type === 'success') {
+        toast.success(`${toastIcon} ${title}`, {
+          description: message,
+          duration: 5000,
+        });
+      } else if (type === 'error') {
+        toast.error(`${toastIcon} ${title}`, {
+          description: message,
+          duration: 6000,
+        });
+      } else if (type === 'warning') {
+        toast.warning(`${toastIcon} ${title}`, {
+          description: message,
+          duration: 5000,
+        });
+      } else {
+        toast.info(`${toastIcon} ${title}`, {
+          description: message,
+          duration: 4000,
+        });
+      }
+      
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    }
   };
 
   const markNotificationAsRead = (notifId: string) => {
@@ -476,45 +506,46 @@ function App() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
-                <UserCircleGear size={28} weight="fill" className="text-white" />
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
+                <UserCircleGear size={24} weight="fill" className="text-white sm:w-7 sm:h-7" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold">HR-TechPro</h1>
-                <p className="text-sm text-muted-foreground">{isAdmin ? 'لوحة تحكم المدير' : 'حساب الموظف'}</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold truncate">HR-TechPro</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">{isAdmin ? 'لوحة تحكم المدير' : 'حساب الموظف'}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-3">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell size={24} />
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
+                    <Bell size={20} className="sm:w-6 sm:h-6" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-xs rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1 -left-1 w-4 h-4 sm:w-5 sm:h-5 bg-accent text-white text-xs rounded-full flex items-center justify-center pulse-dot font-bold">
                         {unreadCount}
                       </span>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80" align="end">
+                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-md" align="end">
                   <div className="space-y-4">
-                    <h3 className="font-bold text-lg">الإشعارات</h3>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                    <h3 className="font-bold text-base sm:text-lg">الإشعارات</h3>
+                    <div className="space-y-2 max-h-[60vh] sm:max-h-96 overflow-y-auto">
                       {getUserNotifications().length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-4">لا توجد إشعارات</p>
                       ) : (
                         getUserNotifications().map((notif) => (
                           <div
                             key={notif.id}
-                            className={`p-3 rounded-lg border cursor-pointer ${notif.read ? 'bg-muted/30' : 'bg-accent/10 border-accent'}`}
+                            className={`p-3 rounded-lg border cursor-pointer transition-all ${notif.read ? 'bg-muted/30' : 'bg-accent/10 border-accent'}`}
                             onClick={() => markNotificationAsRead(notif.id)}
                           >
                             <p className="font-semibold text-sm">{notif.title}</p>
                             <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">{new Date(notif.createdAt).toLocaleString('ar-SA')}</p>
                           </div>
                         ))
                       )}
@@ -523,80 +554,82 @@ function App() {
                 </PopoverContent>
               </Popover>
               
-              <div className="flex items-center gap-2">
-                <Avatar>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src={currentUser.avatar} />
-                  <AvatarFallback>{currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
+                  <AvatarFallback className="text-xs sm:text-sm">{currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
                 </Avatar>
-                <div className="hidden md:block">
+                <div className="hidden lg:block">
                   <p className="font-semibold text-sm">{currentUser.name}</p>
                   <p className="text-xs text-muted-foreground">{currentUser.department}</p>
                 </div>
               </div>
               
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <SignOut size={24} />
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="h-9 w-9 sm:h-10 sm:w-10">
+                <SignOut size={20} className="sm:w-6 sm:h-6" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue={isAdmin ? "dashboard" : "attendance"} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <Tabs defaultValue={isAdmin ? "dashboard" : "attendance"} className="space-y-4 sm:space-y-6">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'} gap-1 sm:gap-0 h-auto sm:h-10 p-1`}>
             {isAdmin && (
               <>
-                <TabsTrigger value="dashboard">
-                  <ChartLine size={20} className="ml-2" />
-                  لوحة التحكم
+                <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2 sm:py-0">
+                  <ChartLine size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">لوحة التحكم</span>
+                  <span className="sm:hidden">التحكم</span>
                 </TabsTrigger>
-                <TabsTrigger value="analytics">
-                  <Lightning size={20} className="ml-2" />
-                  التحليلات الذكية
+                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 sm:py-0">
+                  <Lightning size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">التحليلات الذكية</span>
+                  <span className="sm:hidden">التحليلات</span>
                 </TabsTrigger>
-                <TabsTrigger value="employees">
-                  <UserCircleGear size={20} className="ml-2" />
+                <TabsTrigger value="employees" className="text-xs sm:text-sm py-2 sm:py-0">
+                  <UserCircleGear size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                   الموظفين
                 </TabsTrigger>
               </>
             )}
-            <TabsTrigger value="attendance">
-              <ClockCounterClockwise size={20} className="ml-2" />
+            <TabsTrigger value="attendance" className="text-xs sm:text-sm py-2 sm:py-0">
+              <ClockCounterClockwise size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
               الحضور
             </TabsTrigger>
-            <TabsTrigger value="tasks">
-              <Check size={20} className="ml-2" />
+            <TabsTrigger value="tasks" className="text-xs sm:text-sm py-2 sm:py-0">
+              <Check size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
               المهام
             </TabsTrigger>
             {!isAdmin && (
-              <TabsTrigger value="leave">
-                <CalendarBlank size={20} className="ml-2" />
+              <TabsTrigger value="leave" className="text-xs sm:text-sm py-2 sm:py-0">
+                <CalendarBlank size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                 الإجازات
               </TabsTrigger>
             )}
-            <TabsTrigger value="payroll">
-              <Money size={20} className="ml-2" />
+            <TabsTrigger value="payroll" className="text-xs sm:text-sm py-2 sm:py-0">
+              <Money size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
               الرواتب
             </TabsTrigger>
           </TabsList>
 
           {isAdmin && (
             <>
-              <TabsContent value="dashboard" className="space-y-6">
+              <TabsContent value="dashboard" className="space-y-4 sm:space-y-6">
                 <StatsCards stats={getStats()} />
                 <BuildingMap employees={employees} todayAttendance={getTodayAttendance()} />
               </TabsContent>
 
-              <TabsContent value="analytics" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Lightning size={24} className="text-primary" weight="fill" />
+              <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <Card className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                      <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <Lightning size={20} className="sm:w-6 sm:h-6 text-primary" weight="fill" />
                         اقتراحات تعيين المهام
                       </h3>
-                      <Button onClick={loadAITaskSuggestions} disabled={loadingAI} size="sm">
+                      <Button onClick={loadAITaskSuggestions} disabled={loadingAI} size="sm" className="w-full sm:w-auto">
                         {loadingAI ? 'جاري التحميل...' : 'تحديث'}
                       </Button>
                     </div>
@@ -607,13 +640,13 @@ function App() {
                         </p>
                       ) : (
                         aiSuggestions.map((suggestion, idx) => (
-                          <div key={idx} className="p-4 border rounded-lg space-y-2">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-semibold">{suggestion.employeeName}</p>
+                          <div key={idx} className="p-3 sm:p-4 border rounded-lg space-y-2">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-sm sm:text-base truncate">{suggestion.employeeName}</p>
                                 <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
                               </div>
-                              <Badge variant="secondary">{suggestion.confidence}%</Badge>
+                              <Badge variant="secondary" className="flex-shrink-0">{suggestion.confidence}%</Badge>
                             </div>
                             <div className="space-y-1">
                               <div className="flex justify-between text-xs">
@@ -628,13 +661,13 @@ function App() {
                     </div>
                   </Card>
 
-                  <Card className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Clock size={24} className="text-accent" weight="fill" />
+                  <Card className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                      <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <Clock size={20} className="sm:w-6 sm:h-6 text-accent" weight="fill" />
                         توقعات التأخير
                       </h3>
-                      <Button onClick={loadLatenessPredictions} disabled={loadingAI} size="sm">
+                      <Button onClick={loadLatenessPredictions} disabled={loadingAI} size="sm" className="w-full sm:w-auto">
                         {loadingAI ? 'جاري التحميل...' : 'تحديث'}
                       </Button>
                     </div>
@@ -645,13 +678,13 @@ function App() {
                         </p>
                       ) : (
                         latenessPredictions.map((pred, idx) => (
-                          <div key={idx} className="p-4 border rounded-lg space-y-2">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-semibold">{pred.employeeName}</p>
+                          <div key={idx} className="p-3 sm:p-4 border rounded-lg space-y-2">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-sm sm:text-base truncate">{pred.employeeName}</p>
                                 <p className="text-xs text-muted-foreground">{pred.pattern}</p>
                               </div>
-                              <Badge variant={pred.riskLevel === 'high' ? 'destructive' : pred.riskLevel === 'medium' ? 'secondary' : 'outline'}>
+                              <Badge variant={pred.riskLevel === 'high' ? 'destructive' : pred.riskLevel === 'medium' ? 'secondary' : 'outline'} className="flex-shrink-0">
                                 {pred.riskLevel === 'high' ? 'عالي' : pred.riskLevel === 'medium' ? 'متوسط' : 'منخفض'}
                               </Badge>
                             </div>
@@ -670,11 +703,11 @@ function App() {
                   </Card>
                 </div>
 
-                <Card className="p-6">
-                  <h3 className="text-xl font-bold mb-4">التوصيات الذكية</h3>
+                <Card className="p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold mb-4">التوصيات الذكية</h3>
                   <div className="space-y-3">
                     {employees.filter(e => e.isActive && e.role !== 'admin').slice(0, 5).map(emp => (
-                      <div key={emp.id} className="p-4 bg-muted rounded-lg">
+                      <div key={emp.id} className="p-3 sm:p-4 bg-muted rounded-lg">
                         <p className="text-sm">{generateSmartRecommendation(emp, attendanceRecords, tasks)}</p>
                       </div>
                     ))}
@@ -682,30 +715,30 @@ function App() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="employees" className="space-y-6">
-                <Card className="p-6">
-                  <h3 className="text-xl font-bold mb-4">طلبات التفعيل المعلقة</h3>
+              <TabsContent value="employees" className="space-y-4 sm:space-y-6">
+                <Card className="p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold mb-4">طلبات التفعيل المعلقة</h3>
                   <div className="space-y-3">
                     {employees.filter(e => e.isPending).length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">لا توجد طلبات معلقة</p>
                     ) : (
                       employees.filter(e => e.isPending).map(emp => (
-                        <div key={emp.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
+                        <div key={emp.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <Avatar className="flex-shrink-0">
                               <AvatarFallback>{emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
                             </Avatar>
-                            <div>
-                              <p className="font-semibold">{emp.name}</p>
-                              <p className="text-sm text-muted-foreground">{emp.email} • {emp.department}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm sm:text-base truncate">{emp.name}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">{emp.email} • {emp.department}</p>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={() => handleApproveEmployee(emp.id)} className="bg-success text-white">
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button size="sm" onClick={() => handleApproveEmployee(emp.id)} className="bg-success text-white flex-1 sm:flex-initial">
                               <Check size={16} className="ml-1" />
                               موافقة
                             </Button>
-                            <Button size="sm" variant="destructive" onClick={() => handleRejectEmployee(emp.id)}>
+                            <Button size="sm" variant="destructive" onClick={() => handleRejectEmployee(emp.id)} className="flex-1 sm:flex-initial">
                               <X size={16} className="ml-1" />
                               رفض
                             </Button>
@@ -716,25 +749,25 @@ function App() {
                   </div>
                 </Card>
 
-                <Card className="p-6">
-                  <h3 className="text-xl font-bold mb-4">جميع الموظفين</h3>
+                <Card className="p-4 sm:p-6 overflow-x-auto">
+                  <h3 className="text-lg sm:text-xl font-bold mb-4">جميع الموظفين</h3>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>الاسم</TableHead>
-                        <TableHead>البريد</TableHead>
-                        <TableHead>القسم</TableHead>
-                        <TableHead>الحالة</TableHead>
+                        <TableHead className="text-xs sm:text-sm">الاسم</TableHead>
+                        <TableHead className="text-xs sm:text-sm hidden sm:table-cell">البريد</TableHead>
+                        <TableHead className="text-xs sm:text-sm">القسم</TableHead>
+                        <TableHead className="text-xs sm:text-sm">الحالة</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {employees.filter(e => e.isActive).map(emp => (
                         <TableRow key={emp.id}>
-                          <TableCell className="font-semibold">{emp.name}</TableCell>
-                          <TableCell>{emp.email}</TableCell>
-                          <TableCell>{emp.department}</TableCell>
+                          <TableCell className="font-semibold text-xs sm:text-sm">{emp.name}</TableCell>
+                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{emp.email}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{emp.department}</TableCell>
                           <TableCell>
-                            <Badge variant="default" className="bg-success">نشط</Badge>
+                            <Badge variant="default" className="bg-success text-xs">نشط</Badge>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -745,18 +778,18 @@ function App() {
             </>
           )}
 
-          <TabsContent value="attendance" className="space-y-6">
+          <TabsContent value="attendance" className="space-y-4 sm:space-y-6">
             {!isAdmin && <AttendanceCheckIn employee={currentUser} todayAttendance={getUserTodayAttendance()} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} />}
             
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">سجل الحضور</h3>
+            <Card className="p-4 sm:p-6 overflow-x-auto">
+              <h3 className="text-lg sm:text-xl font-bold mb-4">سجل الحضور</h3>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isAdmin ? 'الموظف' : 'التاريخ'}</TableHead>
-                    <TableHead>الحضور</TableHead>
-                    <TableHead>الانصراف</TableHead>
-                    <TableHead>الحالة</TableHead>
+                    <TableHead className="text-xs sm:text-sm">{isAdmin ? 'الموظف' : 'التاريخ'}</TableHead>
+                    <TableHead className="text-xs sm:text-sm">الحضور</TableHead>
+                    <TableHead className="text-xs sm:text-sm">الانصراف</TableHead>
+                    <TableHead className="text-xs sm:text-sm">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -767,14 +800,14 @@ function App() {
                       const emp = employees.find(e => e.id === record.employeeId);
                       return (
                         <TableRow key={record.id}>
-                          <TableCell>{isAdmin ? emp?.name : record.date}</TableCell>
-                          <TableCell>{formatTime(record.checkIn)}</TableCell>
-                          <TableCell>{record.checkOut ? formatTime(record.checkOut) : '-'}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{isAdmin ? emp?.name : record.date}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{formatTime(record.checkIn)}</TableCell>
+                          <TableCell className="text-xs sm:text-sm">{record.checkOut ? formatTime(record.checkOut) : '-'}</TableCell>
                           <TableCell>
                             {record.isLate ? (
-                              <Badge variant="secondary" className="bg-accent text-white">متأخر</Badge>
+                              <Badge variant="secondary" className="bg-accent text-white text-xs">متأخر</Badge>
                             ) : (
-                              <Badge className="bg-success text-white">في الوقت</Badge>
+                              <Badge className="bg-success text-white text-xs">في الوقت</Badge>
                             )}
                           </TableCell>
                         </TableRow>
@@ -785,18 +818,18 @@ function App() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="tasks" className="space-y-6">
+          <TabsContent value="tasks" className="space-y-4 sm:space-y-6">
             {isAdmin && (
               <div className="flex justify-end">
-                <Button onClick={() => setShowTaskDialog(true)} className="gradient-primary">
-                  <Plus size={20} className="ml-2" />
+                <Button onClick={() => setShowTaskDialog(true)} className="gradient-primary w-full sm:w-auto">
+                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
                   إنشاء مهمة جديدة
                 </Button>
               </div>
             )}
             
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">المهام {!isAdmin && 'الخاصة بي'}</h3>
+            <Card className="p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold mb-4">المهام {!isAdmin && 'الخاصة بي'}</h3>
               <div className="space-y-3">
                 {(isAdmin ? tasks : tasks.filter(t => t.assignedTo === currentUser.id)).length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">لا توجد مهام</p>
@@ -804,18 +837,18 @@ function App() {
                   (isAdmin ? tasks : tasks.filter(t => t.assignedTo === currentUser.id)).map(task => {
                     const assignee = employees.find(e => e.id === task.assignedTo);
                     return (
-                      <div key={task.id} className="p-4 border rounded-lg space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-semibold">{task.title}</h4>
-                            <p className="text-sm text-muted-foreground">{task.description}</p>
+                      <div key={task.id} className="p-3 sm:p-4 border rounded-lg space-y-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-semibold text-sm sm:text-base">{task.title}</h4>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{task.description}</p>
                             {isAdmin && <p className="text-xs text-muted-foreground mt-1">المكلف: {assignee?.name}</p>}
                           </div>
-                          <Badge variant={task.status === 'completed' ? 'default' : task.status === 'in_progress' ? 'secondary' : 'outline'}>
+                          <Badge variant={task.status === 'completed' ? 'default' : task.status === 'in_progress' ? 'secondary' : 'outline'} className="text-xs flex-shrink-0">
                             {task.status === 'completed' ? 'مكتمل' : task.status === 'in_progress' ? 'قيد التنفيذ' : 'معلق'}
                           </Badge>
                         </div>
-                        <div className="flex gap-2 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                           <span>الأولوية: {task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
                           <span>•</span>
                           <span>الموعد النهائي: {task.dueDate}</span>
@@ -823,6 +856,7 @@ function App() {
                         {!isAdmin && task.status !== 'completed' && (
                           <Button
                             size="sm"
+                            className="w-full sm:w-auto"
                             onClick={() => {
                               setTasks(current =>
                                 (current ?? []).map(t =>
@@ -846,36 +880,36 @@ function App() {
           </TabsContent>
 
           {!isAdmin && (
-            <TabsContent value="leave" className="space-y-6">
+            <TabsContent value="leave" className="space-y-4 sm:space-y-6">
               <div className="flex justify-end">
-                <Button onClick={() => setShowLeaveDialog(true)} className="gradient-primary">
-                  <Plus size={20} className="ml-2" />
+                <Button onClick={() => setShowLeaveDialog(true)} className="gradient-primary w-full sm:w-auto">
+                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
                   طلب إجازة
                 </Button>
               </div>
 
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-6 p-4 bg-muted rounded-lg">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <span className="text-sm">رصيد الإجازات المتبقي</span>
-                    <span className="text-2xl font-bold">{currentUser.vacationDays - currentUser.usedVacationDays} يوم</span>
+                    <span className="text-xl sm:text-2xl font-bold">{currentUser.vacationDays - currentUser.usedVacationDays} يوم</span>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-4">طلبات الإجازات</h3>
+                <h3 className="text-lg sm:text-xl font-bold mb-4">طلبات الإجازات</h3>
                 <div className="space-y-3">
                   {leaveRequests.filter(r => r.employeeId === currentUser.id).length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">لا توجد طلبات</p>
                   ) : (
                     leaveRequests.filter(r => r.employeeId === currentUser.id).map(request => (
-                      <div key={request.id} className="p-4 border rounded-lg space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-semibold">من {request.startDate} إلى {request.endDate}</p>
-                            <p className="text-sm text-muted-foreground">{request.reason}</p>
+                      <div key={request.id} className="p-3 sm:p-4 border rounded-lg space-y-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm sm:text-base">من {request.startDate} إلى {request.endDate}</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">{request.reason}</p>
                             <p className="text-xs text-muted-foreground">المدة: {request.days} يوم</p>
                           </div>
-                          <Badge variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'}>
+                          <Badge variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'secondary'} className="text-xs flex-shrink-0">
                             {request.status === 'approved' ? 'موافق' : request.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
                           </Badge>
                         </div>
@@ -887,19 +921,19 @@ function App() {
             </TabsContent>
           )}
 
-          <TabsContent value="payroll" className="space-y-6">
+          <TabsContent value="payroll" className="space-y-4 sm:space-y-6">
             {isAdmin && (
               <div className="flex justify-end">
-                <Button onClick={() => setShowPayrollDialog(true)} className="gradient-primary">
-                  <Plus size={20} className="ml-2" />
+                <Button onClick={() => setShowPayrollDialog(true)} className="gradient-primary w-full sm:w-auto">
+                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
                   إضافة مكافأة/خصم
                 </Button>
               </div>
             )}
 
             {isAdmin && (
-              <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">طلبات الإجازات</h3>
+              <Card className="p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold mb-4">طلبات الإجازات</h3>
                 <div className="space-y-3">
                   {leaveRequests.filter(r => r.status === 'pending').length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">لا توجد طلبات معلقة</p>
@@ -907,18 +941,18 @@ function App() {
                     leaveRequests.filter(r => r.status === 'pending').map(request => {
                       const emp = employees.find(e => e.id === request.employeeId);
                       return (
-                        <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-semibold">{emp?.name}</p>
-                            <p className="text-sm text-muted-foreground">من {request.startDate} إلى {request.endDate} ({request.days} يوم)</p>
+                        <div key={request.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-sm sm:text-base truncate">{emp?.name}</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">من {request.startDate} إلى {request.endDate} ({request.days} يوم)</p>
                             <p className="text-xs text-muted-foreground mt-1">السبب: {request.reason}</p>
                           </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={() => handleApproveLeave(request.id)} className="bg-success text-white">
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button size="sm" onClick={() => handleApproveLeave(request.id)} className="bg-success text-white flex-1 sm:flex-initial">
                               <Check size={16} className="ml-1" />
                               موافقة
                             </Button>
-                            <Button size="sm" variant="destructive" onClick={() => handleRejectLeave(request.id)}>
+                            <Button size="sm" variant="destructive" onClick={() => handleRejectLeave(request.id)} className="flex-1 sm:flex-initial">
                               <X size={16} className="ml-1" />
                               رفض
                             </Button>
@@ -931,57 +965,59 @@ function App() {
               </Card>
             )}
 
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">المكافآت والخصومات</h3>
+            <Card className="p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold mb-4">المكافآت والخصومات</h3>
               
               {!isAdmin && (
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   <div className="p-4 bg-success/10 rounded-lg">
                     <p className="text-sm text-muted-foreground">إجمالي المكافآت</p>
-                    <p className="text-2xl font-bold text-success">
+                    <p className="text-xl sm:text-2xl font-bold text-success">
                       {payrollEntries.filter(e => e.employeeId === currentUser.id && e.type === 'bonus').reduce((sum, e) => sum + e.amount, 0)} ريال
                     </p>
                   </div>
                   <div className="p-4 bg-destructive/10 rounded-lg">
                     <p className="text-sm text-muted-foreground">إجمالي الخصومات</p>
-                    <p className="text-2xl font-bold text-destructive">
+                    <p className="text-xl sm:text-2xl font-bold text-destructive">
                       {payrollEntries.filter(e => e.employeeId === currentUser.id && e.type === 'deduction').reduce((sum, e) => sum + e.amount, 0)} ريال
                     </p>
                   </div>
                 </div>
               )}
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {isAdmin && <TableHead>الموظف</TableHead>}
-                    <TableHead>النوع</TableHead>
-                    <TableHead>المبلغ</TableHead>
-                    <TableHead>السبب</TableHead>
-                    <TableHead>التاريخ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(isAdmin ? payrollEntries : payrollEntries.filter(e => e.employeeId === currentUser.id))
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map(entry => {
-                      const emp = employees.find(e => e.id === entry.employeeId);
-                      return (
-                        <TableRow key={entry.id}>
-                          {isAdmin && <TableCell>{emp?.name}</TableCell>}
-                          <TableCell>
-                            <Badge variant={entry.type === 'bonus' ? 'default' : 'destructive'} className={entry.type === 'bonus' ? 'bg-success' : ''}>
-                              {entry.type === 'bonus' ? 'مكافأة' : 'خصم'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-semibold">{entry.amount} ريال</TableCell>
-                          <TableCell>{entry.reason}</TableCell>
-                          <TableCell>{new Date(entry.date).toLocaleDateString('ar-SA')}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {isAdmin && <TableHead className="text-xs sm:text-sm">الموظف</TableHead>}
+                      <TableHead className="text-xs sm:text-sm">النوع</TableHead>
+                      <TableHead className="text-xs sm:text-sm">المبلغ</TableHead>
+                      <TableHead className="text-xs sm:text-sm hidden sm:table-cell">السبب</TableHead>
+                      <TableHead className="text-xs sm:text-sm">التاريخ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(isAdmin ? payrollEntries : payrollEntries.filter(e => e.employeeId === currentUser.id))
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .map(entry => {
+                        const emp = employees.find(e => e.id === entry.employeeId);
+                        return (
+                          <TableRow key={entry.id}>
+                            {isAdmin && <TableCell className="text-xs sm:text-sm">{emp?.name}</TableCell>}
+                            <TableCell>
+                              <Badge variant={entry.type === 'bonus' ? 'default' : 'destructive'} className={`text-xs ${entry.type === 'bonus' ? 'bg-success' : ''}`}>
+                                {entry.type === 'bonus' ? 'مكافأة' : 'خصم'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-semibold text-xs sm:text-sm">{entry.amount} ريال</TableCell>
+                            <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{entry.reason}</TableCell>
+                            <TableCell className="text-xs sm:text-sm">{new Date(entry.date).toLocaleDateString('ar-SA')}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </div>
             </Card>
           </TabsContent>
         </Tabs>

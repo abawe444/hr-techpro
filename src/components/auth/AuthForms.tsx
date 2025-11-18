@@ -88,100 +88,104 @@ export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      <div className="w-full max-w-md space-y-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-3 sm:p-4">
+      <div className="w-full max-w-md space-y-3 sm:space-y-4">
         {isLogin && (
           <Alert className="bg-accent/10 border-accent">
-            <Info size={20} className="text-accent" />
-            <AlertDescription className="text-sm">
+            <Info size={18} className="sm:w-5 sm:h-5 text-accent flex-shrink-0" />
+            <AlertDescription className="text-xs sm:text-sm">
               <div className="font-semibold mb-2">معلومات تسجيل الدخول:</div>
-              <div className="space-y-1 text-xs">
-                <div><strong>المسؤول:</strong> {adminEmail}</div>
+              <div className="space-y-1 text-[10px] sm:text-xs">
+                <div className="break-all"><strong>المسؤول:</strong> {adminEmail}</div>
                 <div><strong>كلمة المرور:</strong> admin123</div>
                 <hr className="my-2 border-accent/20" />
-                <div><strong>موظف تجريبي:</strong> ahmed.said@company.com</div>
+                <div className="break-all"><strong>موظف تجريبي:</strong> ahmed.said@company.com</div>
                 <div><strong>كلمة المرور:</strong> emp123</div>
               </div>
             </AlertDescription>
           </Alert>
         )}
         
-        <Card className="p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-primary mb-4">
-              <UserCircle size={40} weight="fill" className="text-white" />
+        <Card className="p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-primary mb-3 sm:mb-4">
+              <UserCircle size={32} weight="fill" className="text-white sm:w-10 sm:h-10" />
             </div>
-            <h1 className="text-3xl font-bold">HR-TechPro</h1>
-            <p className="text-muted-foreground mt-2">نظام إدارة الموظفين والحضور</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">HR-TechPro</h1>
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base">نظام إدارة الموظفين والحضور</p>
           </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4 sm:mb-6">
           <Button
             variant={isLogin ? 'default' : 'outline'}
-            className={isLogin ? 'gradient-primary flex-1' : 'flex-1'}
+            className={isLogin ? 'gradient-primary flex-1 text-sm sm:text-base' : 'flex-1 text-sm sm:text-base'}
             onClick={() => setIsLogin(true)}
           >
             تسجيل الدخول
           </Button>
           <Button
             variant={!isLogin ? 'default' : 'outline'}
-            className={!isLogin ? 'gradient-primary flex-1' : 'flex-1'}
+            className={!isLogin ? 'gradient-primary flex-1 text-sm sm:text-base' : 'flex-1 text-sm sm:text-base'}
             onClick={() => setIsLogin(false)}
           >
             إنشاء حساب
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {!isLogin && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم الكامل *</Label>
+                <Label htmlFor="name" className="text-sm">الاسم الكامل *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="أدخل اسمك الكامل"
+                  className="text-sm sm:text-base"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="employeeId">الرقم الوظيفي *</Label>
+                <Label htmlFor="employeeId" className="text-sm">الرقم الوظيفي *</Label>
                 <Input
                   id="employeeId"
                   value={formData.employeeId}
                   onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
                   placeholder="مثال: EMP001"
+                  className="text-sm sm:text-base"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="rank">الرتبة</Label>
+                  <Label htmlFor="rank" className="text-sm">الرتبة</Label>
                   <Input
                     id="rank"
                     value={formData.rank}
                     onChange={(e) => setFormData({ ...formData, rank: e.target.value })}
                     placeholder="مثال: مهندس"
+                    className="text-sm sm:text-base"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="salary">الراتب</Label>
+                  <Label htmlFor="salary" className="text-sm">الراتب</Label>
                   <Input
                     id="salary"
                     type="number"
                     value={formData.salary}
                     onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                     placeholder="0"
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="department">القسم *</Label>
+                <Label htmlFor="department" className="text-sm">القسم *</Label>
                 <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
-                  <SelectTrigger id="department">
+                  <SelectTrigger id="department" className="text-sm sm:text-base">
                     <SelectValue placeholder="اختر القسم" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,45 +200,48 @@ export function AuthForms({ onLogin, onRegister }: AuthFormsProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="region">المنطقة/الموقع</Label>
+                <Label htmlFor="region" className="text-sm">المنطقة/الموقع</Label>
                 <Input
                   id="region"
                   value={formData.region}
                   onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                   placeholder="مثال: الرياض"
+                  className="text-sm sm:text-base"
                 />
               </div>
             </>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني *</Label>
+            <Label htmlFor="email" className="text-sm">البريد الإلكتروني *</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="example@company.com"
+              className="text-sm sm:text-base"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">كلمة المرور *</Label>
+            <Label htmlFor="password" className="text-sm">كلمة المرور *</Label>
             <Input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="••••••••"
+              className="text-sm sm:text-base"
             />
           </div>
 
-          <Button type="submit" className="w-full gradient-primary" size="lg">
+          <Button type="submit" className="w-full gradient-primary text-sm sm:text-base" size="lg">
             {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}
           </Button>
 
           {!isLogin && (
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
               سيتم مراجعة طلبك من قبل المدير وستتلقى إشعاراً عند تفعيل حسابك
             </p>
           )}
