@@ -53,6 +53,7 @@ import {
   Plus,
   Check,
   X,
+  Clock,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatDate, formatTime, generateAITaskSuggestions, predictLateness, generateSmartRecommendation } from '@/lib/ai-helpers';
@@ -69,12 +70,19 @@ import type {
 } from '@/lib/types';
 
 function App() {
-  const [employees, setEmployees] = useKV<Employee[]>('employees', []);
-  const [attendanceRecords, setAttendanceRecords] = useKV<AttendanceRecord[]>('attendance', []);
-  const [tasks, setTasks] = useKV<Task[]>('tasks', []);
-  const [leaveRequests, setLeaveRequests] = useKV<LeaveRequest[]>('leaveRequests', []);
-  const [payrollEntries, setPayrollEntries] = useKV<PayrollEntry[]>('payrollEntries', []);
-  const [notifications, setNotifications] = useKV<Notification[]>('notifications', []);
+  const [employeesRaw, setEmployees] = useKV<Employee[]>('employees', []);
+  const [attendanceRecordsRaw, setAttendanceRecords] = useKV<AttendanceRecord[]>('attendance', []);
+  const [tasksRaw, setTasks] = useKV<Task[]>('tasks', []);
+  const [leaveRequestsRaw, setLeaveRequests] = useKV<LeaveRequest[]>('leaveRequests', []);
+  const [payrollEntriesRaw, setPayrollEntries] = useKV<PayrollEntry[]>('payrollEntries', []);
+  const [notificationsRaw, setNotifications] = useKV<Notification[]>('notifications', []);
+  
+  const employees = employeesRaw ?? [];
+  const attendanceRecords = attendanceRecordsRaw ?? [];
+  const tasks = tasksRaw ?? [];
+  const leaveRequests = leaveRequestsRaw ?? [];
+  const payrollEntries = payrollEntriesRaw ?? [];
+  const notifications = notificationsRaw ?? [];
   
   const [currentUser, setCurrentUser] = useState<Employee | null>(null);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
@@ -108,7 +116,7 @@ function App() {
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'manager';
 
   const handleLogin = (email: string, password: string) => {
-    const employee = employees.find((e) => e.email === email && e.password === password);
+    const employee = (employees ?? []).find((e) => e.email === email && e.password === password);
     
     if (!employee) {
       toast.error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
@@ -144,7 +152,7 @@ function App() {
       isPending: true,
     };
     
-    setEmployees((current) => [...current, newEmployee]);
+    setEmployees((current) => [...(current ?? []), newEmployee]);
     toast.success('تم إرسال طلبك بنجاح. سيتم مراجعته من قبل المدير');
   };
 
@@ -159,7 +167,7 @@ function App() {
       id: `att_${Date.now()}`,
     };
     
-    setAttendanceRecords((current) => [...current, newRecord]);
+    setAttendanceRecords((current) => [...(current ?? []), newRecord]);
     
     if (record.isLate) {
       addNotification(record.employeeId, 'تنبيه تأخير', 'تم تسجيل تأخير في الحضور اليوم', 'warning');
@@ -170,7 +178,7 @@ function App() {
     const today = formatDate(new Date());
     
     setAttendanceRecords((current) =>
-      current.map((record) =>
+      (current ?? []).map((record) =>
         record.employeeId === currentUser?.id && record.date === today && !record.checkOut
           ? { ...record, checkOut: checkOutTime }
           : record
@@ -180,7 +188,7 @@ function App() {
 
   const handleApproveEmployee = (employeeId: string) => {
     setEmployees((current) =>
-      current.map((emp) =>
+      (current ?? []).map((emp) =>
         emp.id === employeeId
           ? { ...emp, isActive: true, isPending: false }
           : emp
@@ -192,7 +200,7 @@ function App() {
   };
 
   const handleRejectEmployee = (employeeId: string) => {
-    setEmployees((current) => current.filter((emp) => emp.id !== employeeId));
+    setEmployees((current) => (current ?? []).filter((emp) => emp.id !== employeeId));
     toast.info('تم رفض الطلب');
   };
 
@@ -238,7 +246,7 @@ function App() {
       createdAt: new Date().toISOString(),
     };
     
-    setTasks((current) => [...current, newTask]);
+    setTasks((current) => [...(current ?? []), newTask]);
     addNotification(taskForm.assignedTo, 'مهمة جديدة', `تم تعيين مهمة جديدة لك: ${taskForm.title}`, 'info');
     
     setShowTaskDialog(false);
@@ -278,7 +286,7 @@ function App() {
       days,
     };
     
-    setLeaveRequests((current) => [...current, newRequest]);
+    setLeaveRequests((current) => [...(current ?? []), newRequest]);
     
     const adminUsers = employees.filter((e) => e.role === 'admin' || e.role === 'manager');
     adminUsers.forEach((admin) => {
@@ -294,7 +302,7 @@ function App() {
     if (!request) return;
     
     setLeaveRequests((current) =>
-      current.map((r) =>
+      (current ?? []).map((r) =>
         r.id === requestId
           ? { ...r, status: 'approved', reviewedAt: new Date().toISOString(), reviewedBy: currentUser!.id }
           : r
@@ -302,7 +310,7 @@ function App() {
     );
     
     setEmployees((current) =>
-      current.map((emp) =>
+      (current ?? []).map((emp) =>
         emp.id === request.employeeId
           ? { ...emp, usedVacationDays: emp.usedVacationDays + request.days }
           : emp
@@ -318,7 +326,7 @@ function App() {
     if (!request) return;
     
     setLeaveRequests((current) =>
-      current.map((r) =>
+      (current ?? []).map((r) =>
         r.id === requestId
           ? { ...r, status: 'rejected', reviewedAt: new Date().toISOString(), reviewedBy: currentUser!.id }
           : r
@@ -345,7 +353,7 @@ function App() {
       createdBy: currentUser!.id,
     };
     
-    setPayrollEntries((current) => [...current, newEntry]);
+    setPayrollEntries((current) => [...(current ?? []), newEntry]);
     
     const message = payrollForm.type === 'bonus'
       ? `تم منحك مكافأة بقيمة ${payrollForm.amount} ريال. السبب: ${payrollForm.reason}`
@@ -380,12 +388,12 @@ function App() {
       createdAt: new Date().toISOString(),
     };
     
-    setNotifications((current) => [...current, newNotif]);
+    setNotifications((current) => [...(current ?? []), newNotif]);
   };
 
   const markNotificationAsRead = (notifId: string) => {
     setNotifications((current) =>
-      current.map((n) => (n.id === notifId ? { ...n, read: true } : n))
+      (current ?? []).map((n) => (n.id === notifId ? { ...n, read: true } : n))
     );
   };
 
@@ -787,7 +795,7 @@ function App() {
                             size="sm"
                             onClick={() => {
                               setTasks(current =>
-                                current.map(t =>
+                                (current ?? []).map(t =>
                                   t.id === task.id
                                     ? { ...t, status: 'completed', completedAt: new Date().toISOString() }
                                     : t

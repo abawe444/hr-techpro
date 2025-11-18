@@ -1,5 +1,10 @@
 import type { Employee, AttendanceRecord, Task, AITaskSuggestion, LatenessPrediction } from './types';
 
+declare const spark: {
+  llmPrompt: (strings: TemplateStringsArray, ...values: any[]) => string;
+  llm: (prompt: string, model?: string, jsonMode?: boolean) => Promise<string>;
+};
+
 export const APPROVED_WIFI_SSID = 'CompanyWiFi_Secure';
 export const WORK_START_TIME = '09:00';
 export const LATE_THRESHOLD_MINUTES = 15;
