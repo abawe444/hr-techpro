@@ -20,18 +20,25 @@ A comprehensive HR Management System (HR-TechPro) that empowers managers with AI
 - **Success criteria**: Pending accounts visible in admin panel, activation toggles account access, email notifications sent
 
 ### Biometric Check-in/Check-out (Wi-Fi Enforced)
-- **Functionality**: One-tap attendance recording with fingerprint/face authentication, validated against approved Wi-Fi network
-- **Purpose**: Secure, frictionless attendance tracking that prevents location fraud
+- **Functionality**: One-tap attendance recording with fingerprint/face authentication, validated against approved Wi-Fi network, with real-time location mapping
+- **Purpose**: Secure, frictionless attendance tracking that prevents location fraud and provides live employee location tracking
 - **Trigger**: Employee taps "Check-in" or "Check-out" button on mobile
-- **Progression**: Tap button → Biometric prompt appears → Authenticate → Validate Wi-Fi connection → Record timestamp → Show success confirmation with time → Update real-time dashboard
-- **Success criteria**: Attendance only succeeds on approved Wi-Fi, timestamps accurate to the second, admin dashboard updates instantly, failed attempts logged
+- **Progression**: Select authorized Wi-Fi network → Tap button → Biometric prompt appears → Authenticate → Validate Wi-Fi connection → Record timestamp and position → Show success confirmation with time and location → Update real-time dashboard and map
+- **Success criteria**: Attendance only succeeds on approved Wi-Fi networks, timestamps accurate to the second, admin dashboard updates instantly, failed attempts logged, employee location plotted on building map
 
-### Real-Time Attendance Dashboard (Admin)
-- **Functionality**: Live visualization showing who's present (green dots), late (yellow), absent (red) with building map/structured list view
-- **Purpose**: Instant situational awareness of workforce attendance status
+### Wi-Fi Network Management (Admin)
+- **Functionality**: Admin interface to configure and manage authorized Wi-Fi networks for each center/location
+- **Purpose**: Flexible control over approved locations for attendance check-in, allowing admins to update network names and zones
+- **Trigger**: Admin navigates to "Wi-Fi Networks" settings tab
+- **Progression**: View current routers → Click "Edit" on router → Update center name and SSID → Save changes → System validates new configuration → Employees see updated network list
+- **Success criteria**: Network changes reflect immediately in check-in options, validation prevents duplicate SSIDs, clear zone identification (right/center/left)
+
+### Real-Time Attendance Dashboard with Live Location Map (Admin)
+- **Functionality**: Interactive building map visualization showing live employee positions based on Wi-Fi network connections, with zone filtering and employee clustering
+- **Purpose**: Instant situational awareness of workforce attendance status and physical distribution across locations
 - **Trigger**: Admin navigates to dashboard
-- **Progression**: Load dashboard → Display statistics (total/present/absent/late counts) → Render building visualization → Auto-refresh every 30 seconds → Click employee for details
-- **Success criteria**: Updates within 5 seconds of check-in, accurate color coding, employee details accessible on click
+- **Progression**: Load dashboard → Display statistics (total/present/absent/late counts) → Render 3-center building map with Wi-Fi router positions → Plot employee positions dynamically → Filter by zone/router → Auto-refresh positions every 3 seconds → Click employee marker for details
+- **Success criteria**: Updates within 5 seconds of check-in, accurate position plotting around routers, smooth animations, zone-based filtering works correctly, employee lists per router show accurate counts
 
 ### AI Task Assignment Engine
 - **Functionality**: Manual task creation with AI suggestions for optimal assignee based on performance history and current workload

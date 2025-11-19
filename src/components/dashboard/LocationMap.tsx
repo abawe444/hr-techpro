@@ -10,36 +10,10 @@ import { formatDate } from '@/lib/ai-helpers';
 interface LocationMapProps {
   employees: Employee[];
   todayAttendance: AttendanceRecord[];
+  routers: WiFiRouter[];
 }
 
-const WIFI_ROUTERS: WiFiRouter[] = [
-  {
-    id: 'router_1',
-    name: 'مركز أمان المحرك',
-    ssid: 'HR-TechPro-Right',
-    zone: 'right',
-    position: { x: 85, y: 45 },
-    range: 15
-  },
-  {
-    id: 'router_2',
-    name: 'المركز الأوسط',
-    ssid: 'HR-TechPro-Center',
-    zone: 'center',
-    position: { x: 50, y: 45 },
-    range: 15
-  },
-  {
-    id: 'router_3',
-    name: 'المركز الأيسر',
-    ssid: 'HR-TechPro-Left',
-    zone: 'left',
-    position: { x: 15, y: 45 },
-    range: 15
-  }
-];
-
-export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
+export function LocationMap({ employees, todayAttendance, routers }: LocationMapProps) {
   const [employeeLocations, setEmployeeLocations] = useState<EmployeeLocation[]>([]);
   const [selectedRouter, setSelectedRouter] = useState<string | null>(null);
 
@@ -51,7 +25,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
       if (attendance.checkIn && !attendance.checkOut) {
         const employee = employees.find(e => e.id === attendance.employeeId);
         if (employee && employee.isActive && employee.role !== 'admin') {
-          const router = WIFI_ROUTERS[Math.floor(Math.random() * WIFI_ROUTERS.length)];
+          const router = routers[Math.floor(Math.random() * routers.length)];
           
           const angle = Math.random() * 2 * Math.PI;
           const distance = Math.random() * (router.range - 3);
@@ -75,7 +49,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
     const interval = setInterval(() => {
       setEmployeeLocations(prevLocations => 
         prevLocations.map(loc => {
-          const router = WIFI_ROUTERS.find(r => r.ssid === loc.wifiNetwork);
+          const router = routers.find(r => r.ssid === loc.wifiNetwork);
           if (!router) return loc;
 
           const angle = Math.random() * 2 * Math.PI;
@@ -95,7 +69,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [employees, todayAttendance]);
+  }, [employees, todayAttendance, routers]);
 
   const getRouterEmployees = (routerSSID: string) => {
     return employeeLocations.filter(loc => loc.wifiNetwork === routerSSID);
@@ -124,7 +98,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
           >
             الكل ({employeeLocations.length})
           </Button>
-          {WIFI_ROUTERS.map(router => (
+          {routers.map(router => (
             <Button
               key={router.id}
               variant={selectedRouter === router.ssid ? 'default' : 'outline'}
@@ -159,7 +133,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
               مركز أمان المحرك
             </text>
 
-            {WIFI_ROUTERS.map(router => (
+            {routers.map(router => (
               <g key={router.id}>
                 <circle
                   cx={router.position.x}
@@ -238,7 +212,7 @@ export function LocationMap({ employees, todayAttendance }: LocationMapProps) {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {WIFI_ROUTERS.map(router => {
+        {routers.map(router => {
           const routerEmployees = getRouterEmployees(router.ssid);
           return (
             <Card key={router.id} className="p-4">

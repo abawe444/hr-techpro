@@ -6,22 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Fingerprint, WifiHigh, Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { requestBiometricAuth, getCurrentTimeString, isLateCheckIn, formatDate, formatTime } from '@/lib/ai-helpers';
-import type { AttendanceRecord, Employee } from '@/lib/types';
+import type { AttendanceRecord, Employee, WiFiRouter } from '@/lib/types';
 
 interface AttendanceCheckInProps {
   employee: Employee;
   todayAttendance: AttendanceRecord | undefined;
   onCheckIn: (record: Omit<AttendanceRecord, 'id'>) => void;
   onCheckOut: (checkOutTime: string) => void;
+  routers: WiFiRouter[];
 }
 
-const WIFI_NETWORKS = [
-  { ssid: 'HR-TechPro-Right', name: 'مركز أمان المحرك', zone: 'right' },
-  { ssid: 'HR-TechPro-Center', name: 'المركز الأوسط', zone: 'center' },
-  { ssid: 'HR-TechPro-Left', name: 'المركز الأيسر', zone: 'left' }
-];
-
-export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onCheckOut }: AttendanceCheckInProps) {
+export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onCheckOut, routers }: AttendanceCheckInProps) {
   const [loading, setLoading] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<string>('');
 
@@ -43,13 +38,12 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
 
       const checkInTime = getCurrentTimeString();
       const isLate = isLateCheckIn(checkInTime);
-      const network = WIFI_NETWORKS.find(n => n.ssid === selectedNetwork);
+      const network = routers.find(n => n.ssid === selectedNetwork);
 
       const angle = Math.random() * 2 * Math.PI;
       const distance = Math.random() * 12;
-      const baseX = network?.zone === 'right' ? 85 : network?.zone === 'center' ? 50 : 15;
-      const x = baseX + Math.cos(angle) * distance;
-      const y = 45 + Math.sin(angle) * distance;
+      const x = (network?.position.x || 50) + Math.cos(angle) * distance;
+      const y = (network?.position.y || 45) + Math.sin(angle) * distance;
 
       const record: Omit<AttendanceRecord, 'id'> = {
         employeeId: employee.id,
@@ -125,7 +119,7 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
           {selectedNetwork && (
             <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <WifiHigh size={16} weight="fill" className="sm:w-5 sm:h-5 text-success" />
-              <span className="hidden sm:inline">متصل: {WIFI_NETWORKS.find(n => n.ssid === selectedNetwork)?.name}</span>
+              <span className="hidden sm:inline">متصل: {routers.find(n => n.ssid === selectedNetwork)?.name}</span>
               <span className="sm:hidden">متصل</span>
             </div>
           )}
@@ -139,7 +133,7 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
                 <SelectValue placeholder="اختر الشبكة..." />
               </SelectTrigger>
               <SelectContent>
-                {WIFI_NETWORKS.map(network => (
+                {routers.map(network => (
                   <SelectItem key={network.ssid} value={network.ssid}>
                     <div className="flex items-center gap-2">
                       <WifiHigh size={16} weight="fill" />
@@ -162,7 +156,7 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
               <div className="flex justify-between items-center">
                 <span className="text-xs sm:text-sm text-muted-foreground">الموقع</span>
                 <span className="font-bold text-sm sm:text-base">
-                  {WIFI_NETWORKS.find(n => n.ssid === todayAttendance.wifiNetwork)?.name || todayAttendance.wifiNetwork}
+                  {routers.find(n => n.ssid === todayAttendance.wifiNetwork)?.name || todayAttendance.wifiNetwork}
                 </span>
               </div>
             )}

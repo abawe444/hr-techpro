@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthForms } from '@/components/auth/AuthForms';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { LocationMap } from '@/components/dashboard/LocationMap';
+import { WiFiNetworkSettings } from '@/components/dashboard/WiFiNetworkSettings';
 import { AttendanceCheckIn } from '@/components/attendance/AttendanceCheckIn';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -54,6 +55,7 @@ import {
   Check,
   X,
   Clock,
+  WifiHigh,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatDate, formatTime, generateAITaskSuggestions, predictLateness, generateSmartRecommendation } from '@/lib/ai-helpers';
@@ -68,6 +70,7 @@ import type {
   AttendanceStats,
   AITaskSuggestion,
   LatenessPrediction,
+  WiFiRouter,
 } from '@/lib/types';
 
 function App() {
@@ -78,6 +81,32 @@ function App() {
   const [payrollEntriesRaw, setPayrollEntries] = useKV<PayrollEntry[]>('payrollEntries', []);
   const [notificationsRaw, setNotifications] = useKV<Notification[]>('notifications', []);
   const [initialized, setInitialized] = useKV<boolean>('app_initialized', false);
+  const [wifiRoutersRaw, setWifiRouters] = useKV<WiFiRouter[]>('wifi_routers', [
+    {
+      id: 'router_1',
+      name: 'مركز أمان المحرك',
+      ssid: 'HR-TechPro-Right',
+      zone: 'right',
+      position: { x: 85, y: 45 },
+      range: 15
+    },
+    {
+      id: 'router_2',
+      name: 'المركز الأوسط',
+      ssid: 'HR-TechPro-Center',
+      zone: 'center',
+      position: { x: 50, y: 45 },
+      range: 15
+    },
+    {
+      id: 'router_3',
+      name: 'المركز الأيسر',
+      ssid: 'HR-TechPro-Left',
+      zone: 'left',
+      position: { x: 15, y: 45 },
+      range: 15
+    }
+  ]);
   
   const employees = employeesRaw ?? [];
   const attendanceRecords = attendanceRecordsRaw ?? [];
@@ -85,6 +114,7 @@ function App() {
   const leaveRequests = leaveRequestsRaw ?? [];
   const payrollEntries = payrollEntriesRaw ?? [];
   const notifications = notificationsRaw ?? [];
+  const wifiRouters = wifiRoutersRaw ?? [];
   
   const [currentUser, setCurrentUser] = useState<Employee | null>(null);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
@@ -494,6 +524,10 @@ function App() {
 
   const unreadCount = getUserNotifications().filter((n) => !n.read).length;
 
+  const handleUpdateRouters = (updatedRouters: WiFiRouter[]) => {
+    setWifiRouters(() => updatedRouters);
+  };
+
   if (!currentUser) {
     return (
       <>
@@ -575,7 +609,7 @@ function App() {
 
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <Tabs defaultValue={isAdmin ? "dashboard" : "attendance"} className="space-y-4 sm:space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'} gap-1 sm:gap-0 h-auto sm:h-10 p-1`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'} gap-1 sm:gap-0 h-auto sm:h-10 p-1`}>
             {isAdmin && (
               <>
                 <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2 sm:py-0">
@@ -587,6 +621,11 @@ function App() {
                   <Lightning size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">التحليلات الذكية</span>
                   <span className="sm:hidden">التحليلات</span>
+                </TabsTrigger>
+                <TabsTrigger value="wifi" className="text-xs sm:text-sm py-2 sm:py-0">
+                  <WifiHigh size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">شبكات الواي فاي</span>
+                  <span className="sm:hidden">الواي فاي</span>
                 </TabsTrigger>
                 <TabsTrigger value="employees" className="text-xs sm:text-sm py-2 sm:py-0">
                   <UserCircleGear size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
@@ -618,7 +657,11 @@ function App() {
             <>
               <TabsContent value="dashboard" className="space-y-4 sm:space-y-6">
                 <StatsCards stats={getStats()} />
-                <LocationMap employees={employees} todayAttendance={getTodayAttendance()} />
+                <LocationMap employees={employees} todayAttendance={getTodayAttendance()} routers={wifiRouters} />
+              </TabsContent>
+
+              <TabsContent value="wifi" className="space-y-4 sm:space-y-6">
+                <WiFiNetworkSettings routers={wifiRouters} onUpdateRouters={handleUpdateRouters} />
               </TabsContent>
 
               <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
@@ -779,7 +822,7 @@ function App() {
           )}
 
           <TabsContent value="attendance" className="space-y-4 sm:space-y-6">
-            {!isAdmin && <AttendanceCheckIn employee={currentUser} todayAttendance={getUserTodayAttendance()} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} />}
+            {!isAdmin && <AttendanceCheckIn employee={currentUser} todayAttendance={getUserTodayAttendance()} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} routers={wifiRouters} />}
             
             <Card className="p-4 sm:p-6 overflow-x-auto">
               <h3 className="text-lg sm:text-xl font-bold mb-4">سجل الحضور</h3>
