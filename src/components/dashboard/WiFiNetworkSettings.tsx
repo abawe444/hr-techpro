@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -14,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { WifiHigh, Plus, Trash, PencilSimple } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { RouterCustomization } from './RouterCustomization';
 import type { WiFiRouter } from '@/lib/types';
 
 interface WiFiNetworkSettingsProps {
@@ -31,6 +30,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
     positionX: 50,
     positionY: 45,
     range: 15,
+    icon: 'wifi',
+    iconSize: 24,
+    signalColor: 'oklch(0.72 0.15 50)',
+    signalOpacity: 0.3,
+    signalPattern: 'solid' as 'solid' | 'dashed' | 'dotted' | 'waves',
+    signalRings: 3,
+    customImage: '',
   });
 
   const handleAddRouter = () => {
@@ -42,6 +48,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
       positionX: 50,
       positionY: 45,
       range: 15,
+      icon: 'wifi',
+      iconSize: 24,
+      signalColor: 'oklch(0.72 0.15 50)',
+      signalOpacity: 0.3,
+      signalPattern: 'solid',
+      signalRings: 3,
+      customImage: '',
     });
     setShowEditDialog(true);
   };
@@ -55,6 +68,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
       positionX: router.position.x,
       positionY: router.position.y,
       range: router.range,
+      icon: router.icon || 'wifi',
+      iconSize: router.iconSize || 24,
+      signalColor: router.signalColor || 'oklch(0.72 0.15 50)',
+      signalOpacity: router.signalOpacity || 0.3,
+      signalPattern: router.signalPattern || 'solid',
+      signalRings: router.signalRings || 3,
+      customImage: router.customImage || '',
     });
     setShowEditDialog(true);
   };
@@ -86,6 +106,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
               zone: routerForm.zone,
               position: { x: routerForm.positionX, y: routerForm.positionY },
               range: routerForm.range,
+              icon: routerForm.icon,
+              iconSize: routerForm.iconSize,
+              signalColor: routerForm.signalColor,
+              signalOpacity: routerForm.signalOpacity,
+              signalPattern: routerForm.signalPattern,
+              signalRings: routerForm.signalRings,
+              customImage: routerForm.customImage,
             }
           : r
       );
@@ -99,6 +126,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
         zone: routerForm.zone,
         position: { x: routerForm.positionX, y: routerForm.positionY },
         range: routerForm.range,
+        icon: routerForm.icon,
+        iconSize: routerForm.iconSize,
+        signalColor: routerForm.signalColor,
+        signalOpacity: routerForm.signalOpacity,
+        signalPattern: routerForm.signalPattern,
+        signalRings: routerForm.signalRings,
+        customImage: routerForm.customImage,
       };
       onUpdateRouters([...routers, newRouter]);
       toast.success('تم إضافة الراوتر بنجاح');
@@ -113,6 +147,13 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
       positionX: 50,
       positionY: 45,
       range: 15,
+      icon: 'wifi',
+      iconSize: 24,
+      signalColor: 'oklch(0.72 0.15 50)',
+      signalOpacity: 0.3,
+      signalPattern: 'solid',
+      signalRings: 3,
+      customImage: '',
     });
   };
 
@@ -211,146 +252,19 @@ export function WiFiNetworkSettings({ routers, onUpdateRouters }: WiFiNetworkSet
       </Card>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editingRouter ? 'تعديل بيانات الراوتر' : 'إضافة راوتر جديد'}</DialogTitle>
             <DialogDescription>
-              {editingRouter ? 'قم بتحديث بيانات الراوتر' : 'قم بإضافة راوتر جديد إلى الخريطة'}
+              {editingRouter ? 'قم بتحديث بيانات الراوتر وتخصيص شكله' : 'قم بإضافة راوتر جديد إلى الخريطة وتخصيصه'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="router-name">اسم المركز *</Label>
-              <Input
-                id="router-name"
-                value={routerForm.name}
-                onChange={(e) => setRouterForm({ ...routerForm, name: e.target.value })}
-                placeholder="مثال: مركز أمان المحرك"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="router-ssid">اسم شبكة الواي فاي (SSID) *</Label>
-              <Input
-                id="router-ssid"
-                value={routerForm.ssid}
-                onChange={(e) => setRouterForm({ ...routerForm, ssid: e.target.value })}
-                placeholder="مثال: HR-TechPro-Center"
-                className="font-mono"
-              />
-              <p className="text-xs text-muted-foreground">
-                يجب أن يكون مطابقاً تماماً لاسم الشبكة في جهاز الراوتر
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="router-zone">المنطقة *</Label>
-              <select
-                id="router-zone"
-                value={routerForm.zone}
-                onChange={(e) => setRouterForm({ ...routerForm, zone: e.target.value as any })}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <option value="right">مركز أمان المحرك (يمين)</option>
-                <option value="center">المركز الأوسط</option>
-                <option value="left">المركز الأيسر</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="router-x">الموقع الأفقي (X)</Label>
-                <Input
-                  id="router-x"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={routerForm.positionX}
-                  onChange={(e) => setRouterForm({ ...routerForm, positionX: parseFloat(e.target.value) || 0 })}
-                />
-                <p className="text-xs text-muted-foreground">من 0 إلى 100</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="router-y">الموقع العمودي (Y)</Label>
-                <Input
-                  id="router-y"
-                  type="number"
-                  min="0"
-                  max="60"
-                  value={routerForm.positionY}
-                  onChange={(e) => setRouterForm({ ...routerForm, positionY: parseFloat(e.target.value) || 0 })}
-                />
-                <p className="text-xs text-muted-foreground">من 0 إلى 60</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="router-range">نطاق التغطية (بالمتر)</Label>
-              <Input
-                id="router-range"
-                type="number"
-                min="5"
-                max="30"
-                value={routerForm.range}
-                onChange={(e) => setRouterForm({ ...routerForm, range: parseFloat(e.target.value) || 15 })}
-              />
-              <p className="text-xs text-muted-foreground">
-                نطاق تغطية إشارة الواي فاي (الموصى به: 15 متر)
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>معاينة موقع الراوتر على الخريطة</Label>
-              <div className="relative bg-muted rounded-lg overflow-hidden" style={{ paddingBottom: '60%' }}>
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 100 60"
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  <rect x="2" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
-                  <rect x="35" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
-                  <rect x="68" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
-
-                  <text x="17" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-                    المركز الأيسر
-                  </text>
-                  <text x="50" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-                    المركز الأوسط
-                  </text>
-                  <text x="83" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-                    مركز أمان المحرك
-                  </text>
-
-                  <circle
-                    cx={routerForm.positionX}
-                    cy={routerForm.positionY}
-                    r={routerForm.range}
-                    fill="oklch(0.72 0.15 50 / 0.1)"
-                    stroke="oklch(0.72 0.15 50 / 0.3)"
-                    strokeWidth="0.2"
-                    strokeDasharray="1,1"
-                  />
-                  <circle
-                    cx={routerForm.positionX}
-                    cy={routerForm.positionY}
-                    r="2"
-                    fill="oklch(0.72 0.15 50)"
-                  />
-                  <circle
-                    cx={routerForm.positionX}
-                    cy={routerForm.positionY}
-                    r="1"
-                    fill="white"
-                  />
-                </svg>
-              </div>
-            </div>
-            
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <h4 className="font-semibold text-sm mb-2">مواقع افتراضية للمراكز:</h4>
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>• المركز الأيسر: X=15, Y=45</p>
-                <p>• المركز الأوسط: X=50, Y=45</p>
-                <p>• مركز أمان المحرك (يمين): X=85, Y=45</p>
-              </div>
-            </div>
-          </div>
+          
+          <RouterCustomization
+            routerForm={routerForm}
+            onFormChange={(updates) => setRouterForm({ ...routerForm, ...updates })}
+          />
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               إلغاء

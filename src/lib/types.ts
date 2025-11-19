@@ -116,6 +116,13 @@ export interface WiFiRouter {
     y: number;
   };
   range: number;
+  icon?: string;
+  iconSize?: number;
+  signalColor?: string;
+  signalOpacity?: number;
+  signalPattern?: 'solid' | 'dashed' | 'dotted' | 'waves';
+  signalRings?: number;
+  customImage?: string;
 }
 
 export interface EmployeeLocation {

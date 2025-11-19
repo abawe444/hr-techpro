@@ -88,7 +88,14 @@ function App() {
       ssid: 'HR-TechPro-Right',
       zone: 'right',
       position: { x: 85, y: 45 },
-      range: 15
+      range: 15,
+      icon: 'wifi',
+      iconSize: 24,
+      signalColor: 'oklch(0.72 0.15 50)',
+      signalOpacity: 0.3,
+      signalPattern: 'solid',
+      signalRings: 3,
+      customImage: '',
     },
     {
       id: 'router_2',
@@ -96,7 +103,14 @@ function App() {
       ssid: 'HR-TechPro-Center',
       zone: 'center',
       position: { x: 50, y: 45 },
-      range: 15
+      range: 15,
+      icon: 'wifi',
+      iconSize: 24,
+      signalColor: 'oklch(0.45 0.12 250)',
+      signalOpacity: 0.35,
+      signalPattern: 'dashed',
+      signalRings: 4,
+      customImage: '',
     },
     {
       id: 'router_3',
@@ -104,7 +118,14 @@ function App() {
       ssid: 'HR-TechPro-Left',
       zone: 'left',
       position: { x: 15, y: 45 },
-      range: 15
+      range: 15,
+      icon: 'wifi',
+      iconSize: 24,
+      signalColor: 'oklch(0.65 0.18 145)',
+      signalOpacity: 0.3,
+      signalPattern: 'waves',
+      signalRings: 3,
+      customImage: '',
     }
   ]);
   

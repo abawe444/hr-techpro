@@ -135,32 +135,72 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
               مركز أمان المحرك
             </text>
 
-            {routers.map(router => (
-              <g key={router.id}>
-                <circle
-                  cx={router.position.x}
-                  cy={router.position.y}
-                  r={router.range}
-                  fill="oklch(0.72 0.15 50 / 0.05)"
-                  stroke="oklch(0.72 0.15 50 / 0.2)"
-                  strokeWidth="0.2"
-                  strokeDasharray="1,1"
-                />
-                <circle
-                  cx={router.position.x}
-                  cy={router.position.y}
-                  r="2"
-                  fill="oklch(0.72 0.15 50)"
-                  className="pulse-dot"
-                />
-                <circle
-                  cx={router.position.x}
-                  cy={router.position.y}
-                  r="1"
-                  fill="white"
-                />
-              </g>
-            ))}
+            {routers.map(router => {
+              const signalColor = router.signalColor || 'oklch(0.72 0.15 50)';
+              const signalOpacity = router.signalOpacity || 0.3;
+              const signalPattern = router.signalPattern || 'solid';
+              const signalRings = router.signalRings || 3;
+              
+              const renderSignalRings = () => {
+                const rings: React.ReactNode[] = [];
+                for (let i = 1; i <= signalRings; i++) {
+                  const radius = (router.range / signalRings) * i;
+                  const opacity = signalOpacity * (1 - (i - 1) / signalRings);
+                  
+                  let strokeDasharray = '0';
+                  if (signalPattern === 'dashed') strokeDasharray = '2,2';
+                  if (signalPattern === 'dotted') strokeDasharray = '0.5,1.5';
+                  if (signalPattern === 'waves') strokeDasharray = '3,1.5,1,1.5';
+                  
+                  rings.push(
+                    <circle
+                      key={`${router.id}-ring-${i}`}
+                      cx={router.position.x}
+                      cy={router.position.y}
+                      r={radius}
+                      fill={signalPattern === 'solid' ? `${signalColor} / ${opacity}` : 'none'}
+                      stroke={signalPattern === 'solid' ? `${signalColor} / ${opacity * 0.5}` : `${signalColor} / ${opacity}`}
+                      strokeWidth={signalPattern === 'solid' ? '0.2' : '0.4'}
+                      strokeDasharray={strokeDasharray}
+                    />
+                  );
+                }
+                return rings;
+              };
+              
+              return (
+                <g key={router.id}>
+                  {renderSignalRings()}
+                  
+                  {router.customImage ? (
+                    <image
+                      href={router.customImage}
+                      x={router.position.x - 2}
+                      y={router.position.y - 2}
+                      width="4"
+                      height="4"
+                      preserveAspectRatio="xMidYMid meet"
+                    />
+                  ) : (
+                    <>
+                      <circle
+                        cx={router.position.x}
+                        cy={router.position.y}
+                        r="2"
+                        fill={signalColor}
+                        className="pulse-dot"
+                      />
+                      <circle
+                        cx={router.position.x}
+                        cy={router.position.y}
+                        r="1"
+                        fill="white"
+                      />
+                    </>
+                  )}
+                </g>
+              );
+            })}
 
             {filteredLocations.map((location, index) => (
               <g key={location.employeeId} className="employee-marker">
