@@ -1,21 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { useKV } from '@github/spark/hooks';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage
+import { Card } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { WifiHigh, Image as ImageIcon, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@/lib/types';
 
-interface LocationMapProps {
-  employees: Employee[];
-  todayAttendance: AttendanceRecord[];
-  routers: WiFiRouter[];
-}
+  const [mapImage, setMapIma
+  const fileInputRef = u
+  useEffect(() => {
+      .filter(record => 
+ 
 
-export function LocationMap({ employees, todayAttendance, routers }: LocationMapProps) {
-  const [employeeLocations, setEmployeeLocations] = useState<EmployeeLocation[]>([]);
-  const [selectedRouter, setSelectedRouter] = useState<string | null>(null);
+        
+        const distance = Math.random() * (router.range - 3);
+        const location: EmployeeLocation = {
   const [mapImage, setMapImage] = useKV<string>('map_background_image', '');
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,114 +34,114 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
         
         const location: EmployeeLocation = {
           employeeId: employee.id,
-          employee,
-          position: {
-            x: router.position.x + Math.cos(angle) * distance,
-            y: router.position.y + Math.sin(angle) * distance
-          },
-          wifiNetwork: record.wifiNetwork || router.ssid,
-          lastUpdate: new Date().toISOString(),
-          status: record.isLate ? 'late' : 'present'
-        };
+    }, 3000);
+    return () => clea
 
-        return location;
-      })
-      .filter(Boolean) as EmployeeLocation[];
+    return employeeLocations.filter(loc => loc.wifiNetwork ==
 
-    setEmployeeLocations(presentEmployees);
+    ? employeeLocations.filter(loc => loc.wifiNetwork ===
 
-    const interval = setInterval(() => {
-      setEmployeeLocations(prevLocations => 
-        prevLocations.map(loc => {
-          const router = routers.find(r => r.ssid === loc.wifiNetwork);
-          if (!router) return loc;
+    const file = e.target.files?.[0];
 
-          const angle = Math.random() * 2 * Math.PI;
-          const distance = Math.random() * (router.range - 3);
-          const newX = router.position.x + Math.cos(angle) * distance;
-          const newY = router.position.y + Math.sin(angle) * distance;
 
-          return {
-            ...loc,
-            position: {
-              x: loc.position.x + (newX - loc.position.x) * 0.1,
-              y: loc.position.y + (newY - loc.position.y) * 0.1
-            }
-          };
-        })
-      );
+    }
+    if (
+      return;
+
+    reader.onload = (event) => {
+
+    };
+      toast.error('فشل تحميل الصورة');
+    reader.readAsDataURL(file);
+
+    setMapImage(() => '');
+
+    toast.info('تم حذف صورة الخريطة');
+
+    <div className="space-y-4">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center
+
+              تتبع
+          </div>
+            <input
+              type="file"
+              onChange={handleImageUpload}
+             
+            
+          
+        
     }, 3000);
 
-    return () => clearInterval(interval);
-  }, [employees, todayAttendance, routers]);
+            {mapImage && (
+                variant="outline"
 
-  const getRouterEmployees = (routerSSID: string) => {
-    return employeeLocations.filter(loc => loc.wifiNetwork === routerSSID);
-  };
+              >
+                <span className="hidden sm:inline">حذف</span>
+    
 
-  const filteredLocations = selectedRouter 
-    ? employeeLocations.filter(loc => loc.wifiNetwork === selectedRouter)
-    : employeeLocations;
+        <div className="flex gap-2 mb-4 ove
+            variant={selectedRouter === null ? 'default' : 'outline'}
+            onClick={() 
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+          </Button>
     const file = e.target.files?.[0];
-    if (!file) return;
+              variant=
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('الرجاء اختيار صورة صالحة');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageData = event.target?.result as string;
-      setMapImage(() => imageData);
-      toast.success('تم تحميل صورة الخريطة بنجاح');
-    };
-    reader.onerror = () => {
-      toast.error('فشل تحميل الصورة');
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveImage = () => {
-    setMapImage(() => '');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    toast.info('تم حذف صورة الخريطة');
-  };
-
-  return (
-    <div className="space-y-4">
-      <Card className="p-4 sm:p-6">
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold mb-1">خريطة المراكز الحية</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              تتبع موقع الموظفين في الوقت الفعلي عبر شبكات الواي فاي
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              id="map-image-upload"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-shrink-0"
             >
+              {router.name} ({getRouterEmploye
+          ))}
+    }
+
+          className="relative bg-muted
+          onClick={() => setIsMapExpanded(!isMapExpanded)}
+      return;
+     
+
+          )}
+    reader.onload = (event) => {
+            preserveAspectRatio="xMidYMid meet"
+            {!mapImage && (
+                <rect x="2" y="10" width="30" heigh
+    };
+                <line x1="2"
+      toast.error('فشل تحميل الصورة');
+      
+    reader.readAsDataURL(file);
+    
+
+                </text>
+    setMapImage(() => '');
+            {routers.map(router
+              const signalOpacity = ro
+     
+    toast.info('تم حذف صورة الخريطة');
+    
+
+          
+    <div className="space-y-4">
+                  
+                    <circle
+               
+                      r={radius}
+                      stroke={signalPattern === 'solid' ? `${signalC
+                      strokeDasharray={strokeDasharray}
+                
+          </div>
+              
+            <input
+                  
+              type="file"
+                      x={route
+              onChange={handleImageUpload}
+                      preserveAs
+                  ) : (
+              
+                   
+                        fill={s
+                      /
+                        cx={router.position.x}
+                        r="1"
+             
               <ImageIcon size={16} className="ml-1" />
               <span className="hidden sm:inline">رفع خريطة</span>
               <span className="sm:hidden">خريطة</span>
@@ -256,7 +256,7 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                 }
                 return rings;
               };
-              
+
               return (
                 <g key={router.id}>
                   {renderSignalRings()}
@@ -286,9 +286,9 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                         fill="white"
                       />
                     </>
-                  )}
+
                   
-                  <text 
+
                     x={router.position.x} 
                     y={router.position.y - router.range - 2} 
                     fontSize="2.5" 
@@ -298,23 +298,23 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                     stroke={mapImage ? 'oklch(0.09 0.005 286)' : 'none'}
                     strokeWidth={mapImage ? '0.3' : '0'}
                   >
-                    {router.name}
+
                   </text>
-                </g>
+
               );
-            })}
+
 
             {filteredLocations.map((location, index) => {
               const statusColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
               const initials = location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2);
               
-              return (
+
                 <g key={location.employeeId} className="employee-marker">
-                  <circle
+
                     cx={location.position.x}
                     cy={location.position.y}
                     r="3.5"
-                    fill={statusColor}
+
                     opacity="0.25"
                     className="pulse-dot"
                   />
@@ -326,21 +326,21 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                     stroke="white"
                     strokeWidth="0.3"
                   />
-                  <text
+
                     x={location.position.x}
                     y={location.position.y + 0.7}
                     fontSize="1.2"
-                    fill="white"
+
                     textAnchor="middle"
-                    fontWeight="700"
+
                   >
                     {initials}
                   </text>
                   <title>{location.employee.name} - {location.employee.department}</title>
                 </g>
-              );
+
             })}
-          </svg>
+
         </div>
 
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -348,19 +348,19 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
               <span className="text-xs sm:text-sm font-semibold">في الوقت</span>
-            </div>
+
             <p className="text-xl sm:text-2xl font-bold text-success">
               {employeeLocations.filter(l => l.status === 'present').length}
             </p>
-          </div>
+
           <div className="p-3 sm:p-4 bg-accent/10 rounded-lg border border-accent/20">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-accent"></div>
               <span className="text-xs sm:text-sm font-semibold">متأخرون</span>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-accent">
+
               {employeeLocations.filter(l => l.status === 'late').length}
-            </p>
+
           </div>
           <div className="p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20 col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-1">
@@ -368,17 +368,17 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
               <span className="text-xs sm:text-sm font-semibold">الإجمالي</span>
             </div>
             <p className="text-xl sm:text-2xl font-bold text-primary">
-              {employeeLocations.length}
+
             </p>
           </div>
         </div>
 
         {filteredLocations.length > 0 && (
-          <div className="mt-4">
+
             <h4 className="font-semibold mb-3 text-sm sm:text-base flex items-center gap-2">
-              <span>الموظفون الحاليون</span>
+
               <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-                {filteredLocations.length}
+
               </span>
             </h4>
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-h-64 sm:max-h-80 overflow-y-auto p-1">
@@ -386,11 +386,11 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                 const ringColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
                 const bgColor = location.status === 'late' ? 'oklch(0.68 0.17 35 / 0.15)' : 'oklch(0.65 0.18 145 / 0.15)';
                 
-                return (
+
                   <div
                     key={location.employeeId}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-card border border-border rounded-lg hover:shadow-md transition-all hover:scale-[1.02]"
-                  >
+
                     <Avatar className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 ring-2 ring-offset-1 ring-current" style={{ color: ringColor }}>
                       <AvatarImage src={location.employee.avatar} />
                       <AvatarFallback className="text-xs sm:text-sm font-bold" style={{
@@ -398,7 +398,7 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                         color: ringColor
                       }}>
                         {location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </AvatarFallback>
+
                     </Avatar>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-semibold truncate">{location.employee.name}</p>
@@ -410,12 +410,12 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                       </div>
                     </div>
                   </div>
-                );
+
               })}
-            </div>
+
           </div>
-        )}
+
       </Card>
     </div>
   );
-}
+
