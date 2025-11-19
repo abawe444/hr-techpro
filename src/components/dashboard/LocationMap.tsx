@@ -1,21 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { Avatar, AvatarFallback, AvatarImage
+import { useKV } from '@github/spark/hooks';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Card } from '@/components/ui/card';
 import { WifiHigh, Image as ImageIcon, Trash } from '@phosphor-icons/react';
-import { toast } from 'sonner';
 import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@/lib/types';
 
-  const [mapImage, setMapIma
-  const fileInputRef = u
-  useEffect(() => {
-      .filter(record => 
- 
+interface LocationMapProps {
+  employees: Employee[];
+  todayAttendance: AttendanceRecord[];
+  routers: WiFiRouter[];
+}
 
-        
-        const distance = Math.random() * (router.range - 3);
-        const location: EmployeeLocation = {
+export function LocationMap({ employees, todayAttendance, routers }: LocationMapProps) {
+  const [employeeLocations, setEmployeeLocations] = useState<EmployeeLocation[]>([]);
+  const [selectedRouter, setSelectedRouter] = useState<string | null>(null);
   const [mapImage, setMapImage] = useKV<string>('map_background_image', '');
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,114 +34,105 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
         
         const location: EmployeeLocation = {
           employeeId: employee.id,
-    }, 3000);
-    return () => clea
-
-    return employeeLocations.filter(loc => loc.wifiNetwork ==
-
-    ? employeeLocations.filter(loc => loc.wifiNetwork ===
-
-    const file = e.target.files?.[0];
-
-
-    }
-    if (
-      return;
-
-    reader.onload = (event) => {
-
-    };
-      toast.error('فشل تحميل الصورة');
-    reader.readAsDataURL(file);
-
-    setMapImage(() => '');
-
-    toast.info('تم حذف صورة الخريطة');
-
-    <div className="space-y-4">
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center
-
-              تتبع
-          </div>
-            <input
-              type="file"
-              onChange={handleImageUpload}
-             
-            
-          
+          employee,
+          position: {
+            x: router.position.x + distance * Math.cos(angle),
+            y: router.position.y + distance * Math.sin(angle)
+          },
+          wifiNetwork: record.wifiNetwork || router.ssid,
+          status: record.isLate ? 'late' : 'present',
+          lastUpdate: new Date().toISOString()
+        };
         
+        return location;
+      })
+      .filter((loc): loc is EmployeeLocation => loc !== null);
+
+    setEmployeeLocations(presentEmployees);
+
+    const interval = setInterval(() => {
+      setEmployeeLocations(current => 
+        current.map(loc => {
+          const router = routers.find(r => r.ssid === loc.wifiNetwork) || routers[0];
+          const angle = Math.random() * 2 * Math.PI;
+          const distance = Math.random() * (router.range - 3);
+          
+          return {
+            ...loc,
+            position: {
+              x: router.position.x + distance * Math.cos(angle),
+              y: router.position.y + distance * Math.sin(angle)
+            }
+          };
+        })
+      );
     }, 3000);
 
-            {mapImage && (
-                variant="outline"
+    return () => clearInterval(interval);
+  }, [employees, todayAttendance, routers]);
 
-              >
-                <span className="hidden sm:inline">حذف</span>
-    
+  const getRouterEmployees = (ssid: string) => {
+    return employeeLocations.filter(loc => loc.wifiNetwork === ssid);
+  };
 
-        <div className="flex gap-2 mb-4 ove
-            variant={selectedRouter === null ? 'default' : 'outline'}
-            onClick={() 
+  const filteredLocations = selectedRouter 
+    ? employeeLocations.filter(loc => loc.wifiNetwork === selectedRouter)
+    : employeeLocations;
 
-          </Button>
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-              variant=
+    if (!file) return;
 
-            >
-              {router.name} ({getRouterEmploye
-          ))}
+    if (!file.type.startsWith('image/')) {
+      toast.error('يرجى اختيار ملف صورة صالح');
+      return;
     }
 
-          className="relative bg-muted
-          onClick={() => setIsMapExpanded(!isMapExpanded)}
-      return;
-     
-
-          )}
+    const reader = new FileReader();
     reader.onload = (event) => {
-            preserveAspectRatio="xMidYMid meet"
-            {!mapImage && (
-                <rect x="2" y="10" width="30" heigh
+      const result = event.target?.result as string;
+      if (result) {
+        setMapImage(() => result);
+        toast.success('تم رفع صورة الخريطة بنجاح');
+      }
     };
-                <line x1="2"
+    reader.onerror = () => {
       toast.error('فشل تحميل الصورة');
-      
+    };
     reader.readAsDataURL(file);
-    
+  };
 
-                </text>
+  const handleRemoveImage = () => {
     setMapImage(() => '');
-            {routers.map(router
-              const signalOpacity = ro
-     
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     toast.info('تم حذف صورة الخريطة');
-    
+  };
 
-          
+  return (
     <div className="space-y-4">
-                  
-                    <circle
-               
-                      r={radius}
-                      stroke={signalPattern === 'solid' ? `${signalC
-                      strokeDasharray={strokeDasharray}
-                
+      <Card className="p-4 sm:p-6">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="text-lg sm:text-xl font-bold">تتبع موقع الموظفين</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">مواقع الموظفين الحاليين على الخريطة حسب شبكة الواي فاي</p>
           </div>
-              
+          <div className="flex gap-2">
             <input
-                  
+              ref={fileInputRef}
               type="file"
-                      x={route
+              accept="image/*"
               onChange={handleImageUpload}
-                      preserveAs
-                  ) : (
-              
-                   
-                        fill={s
-                      /
-                        cx={router.position.x}
-                        r="1"
-             
+              className="hidden"
+              id="map-upload"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-shrink-0"
+            >
               <ImageIcon size={16} className="ml-1" />
               <span className="hidden sm:inline">رفع خريطة</span>
               <span className="sm:hidden">خريطة</span>
@@ -286,9 +277,9 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                         fill="white"
                       />
                     </>
-
+                  )}
                   
-
+                  <text 
                     x={router.position.x} 
                     y={router.position.y - router.range - 2} 
                     fontSize="2.5" 
@@ -298,23 +289,23 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                     stroke={mapImage ? 'oklch(0.09 0.005 286)' : 'none'}
                     strokeWidth={mapImage ? '0.3' : '0'}
                   >
-
+                    {router.name}
                   </text>
-
+                </g>
               );
-
+            })}
 
             {filteredLocations.map((location, index) => {
               const statusColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
               const initials = location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2);
               
-
+              return (
                 <g key={location.employeeId} className="employee-marker">
-
+                  <circle
                     cx={location.position.x}
                     cy={location.position.y}
                     r="3.5"
-
+                    fill={statusColor}
                     opacity="0.25"
                     className="pulse-dot"
                   />
@@ -326,21 +317,21 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                     stroke="white"
                     strokeWidth="0.3"
                   />
-
+                  <text
                     x={location.position.x}
                     y={location.position.y + 0.7}
                     fontSize="1.2"
-
+                    fill="white"
                     textAnchor="middle"
-
+                    fontWeight="700"
                   >
                     {initials}
                   </text>
                   <title>{location.employee.name} - {location.employee.department}</title>
                 </g>
-
+              );
             })}
-
+          </svg>
         </div>
 
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -348,19 +339,19 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
               <span className="text-xs sm:text-sm font-semibold">في الوقت</span>
-
+            </div>
             <p className="text-xl sm:text-2xl font-bold text-success">
               {employeeLocations.filter(l => l.status === 'present').length}
             </p>
-
+          </div>
           <div className="p-3 sm:p-4 bg-accent/10 rounded-lg border border-accent/20">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-accent"></div>
               <span className="text-xs sm:text-sm font-semibold">متأخرون</span>
             </div>
-
+            <p className="text-xl sm:text-2xl font-bold text-accent">
               {employeeLocations.filter(l => l.status === 'late').length}
-
+            </p>
           </div>
           <div className="p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20 col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-1">
@@ -368,17 +359,17 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
               <span className="text-xs sm:text-sm font-semibold">الإجمالي</span>
             </div>
             <p className="text-xl sm:text-2xl font-bold text-primary">
-
+              {employeeLocations.length}
             </p>
           </div>
         </div>
 
         {filteredLocations.length > 0 && (
-
+          <div className="mt-4">
             <h4 className="font-semibold mb-3 text-sm sm:text-base flex items-center gap-2">
-
+              الموظفون الحاليون
               <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-
+                {filteredLocations.length}
               </span>
             </h4>
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-h-64 sm:max-h-80 overflow-y-auto p-1">
@@ -386,11 +377,12 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                 const ringColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
                 const bgColor = location.status === 'late' ? 'oklch(0.68 0.17 35 / 0.15)' : 'oklch(0.65 0.18 145 / 0.15)';
                 
-
+                return (
                   <div
                     key={location.employeeId}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-card border border-border rounded-lg hover:shadow-md transition-all hover:scale-[1.02]"
-
+                    style={{ borderColor: ringColor }}
+                  >
                     <Avatar className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 ring-2 ring-offset-1 ring-current" style={{ color: ringColor }}>
                       <AvatarImage src={location.employee.avatar} />
                       <AvatarFallback className="text-xs sm:text-sm font-bold" style={{
@@ -398,7 +390,7 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                         color: ringColor
                       }}>
                         {location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-
+                      </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-semibold truncate">{location.employee.name}</p>
@@ -410,12 +402,12 @@ import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@
                       </div>
                     </div>
                   </div>
-
+                );
               })}
-
+            </div>
           </div>
-
+        )}
       </Card>
     </div>
   );
-
+}
