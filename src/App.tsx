@@ -84,7 +84,7 @@ function App() {
   const [wifiRoutersRaw, setWifiRouters] = useKV<WiFiRouter[]>('wifi_routers', [
     {
       id: 'router_1',
-      name: 'مركز أمان المحرك',
+      name: '-',
       ssid: 'HR-TechPro-Right',
       zone: 'right',
       position: { x: 85, y: 45 },
@@ -99,7 +99,7 @@ function App() {
     },
     {
       id: 'router_2',
-      name: 'المركز الأوسط',
+      name: '--',
       ssid: 'HR-TechPro-Center',
       zone: 'center',
       position: { x: 50, y: 45 },
@@ -114,7 +114,7 @@ function App() {
     },
     {
       id: 'router_3',
-      name: 'المركز الأيسر',
+      name: '---',
       ssid: 'HR-TechPro-Left',
       zone: 'left',
       position: { x: 15, y: 45 },
@@ -628,49 +628,54 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         <Tabs defaultValue={isAdmin ? "dashboard" : "attendance"} className="space-y-4 sm:space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'} gap-1 sm:gap-0 h-auto sm:h-10 p-1`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'} gap-1 h-auto p-1 bg-muted`}>
             {isAdmin && (
               <>
-                <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2 sm:py-0">
+                <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
                   <ChartLine size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">لوحة التحكم</span>
                   <span className="sm:hidden">التحكم</span>
                 </TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 sm:py-0">
+                <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
                   <Lightning size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">التحليلات الذكية</span>
                   <span className="sm:hidden">التحليلات</span>
                 </TabsTrigger>
-                <TabsTrigger value="wifi" className="text-xs sm:text-sm py-2 sm:py-0">
+                <TabsTrigger value="wifi" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
                   <WifiHigh size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">شبكات الواي فاي</span>
                   <span className="sm:hidden">الواي فاي</span>
                 </TabsTrigger>
-                <TabsTrigger value="employees" className="text-xs sm:text-sm py-2 sm:py-0">
+                <TabsTrigger value="employees" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
                   <UserCircleGear size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
-                  الموظفين
+                  <span className="hidden sm:inline">الموظفين</span>
+                  <span className="sm:hidden">موظفين</span>
                 </TabsTrigger>
               </>
             )}
-            <TabsTrigger value="attendance" className="text-xs sm:text-sm py-2 sm:py-0">
+            <TabsTrigger value="attendance" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
               <ClockCounterClockwise size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
-              الحضور
+              <span className="hidden sm:inline">الحضور</span>
+              <span className="sm:hidden">حضور</span>
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs sm:text-sm py-2 sm:py-0">
+            <TabsTrigger value="tasks" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
               <Check size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
-              المهام
+              <span className="hidden sm:inline">المهام</span>
+              <span className="sm:hidden">مهام</span>
             </TabsTrigger>
             {!isAdmin && (
-              <TabsTrigger value="leave" className="text-xs sm:text-sm py-2 sm:py-0">
+              <TabsTrigger value="leave" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
                 <CalendarBlank size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
-                الإجازات
+                <span className="hidden sm:inline">الإجازات</span>
+                <span className="sm:hidden">إجازات</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="payroll" className="text-xs sm:text-sm py-2 sm:py-0">
+            <TabsTrigger value="payroll" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
               <Money size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
-              الرواتب
+              <span className="hidden sm:inline">الرواتب</span>
+              <span className="sm:hidden">رواتب</span>
             </TabsTrigger>
           </TabsList>
 

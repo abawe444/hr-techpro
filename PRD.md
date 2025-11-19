@@ -27,18 +27,18 @@ A comprehensive HR Management System (HR-TechPro) that empowers managers with AI
 - **Success criteria**: Attendance only succeeds on approved Wi-Fi networks, timestamps accurate to the second, admin dashboard updates instantly, failed attempts logged, employee location plotted on building map
 
 ### Wi-Fi Network Management (Admin)
-- **Functionality**: Admin interface to configure and manage authorized Wi-Fi networks for each center/location
-- **Purpose**: Flexible control over approved locations for attendance check-in, allowing admins to update network names and zones
+- **Functionality**: Admin interface to configure and manage authorized Wi-Fi networks for each center/location, including custom map upload and router positioning
+- **Purpose**: Flexible control over approved locations for attendance check-in, allowing admins to upload real building maps and position routers accurately, with simplified center naming (-, --, ---)
 - **Trigger**: Admin navigates to "Wi-Fi Networks" settings tab
-- **Progression**: View current routers → Click "Edit" on router → Update center name and SSID → Save changes → System validates new configuration → Employees see updated network list
-- **Success criteria**: Network changes reflect immediately in check-in options, validation prevents duplicate SSIDs, clear zone identification (right/center/left)
+- **Progression**: View current routers → Upload custom building map image (optional) → Click "Edit" on router → Update center name (-, --, ---), SSID, position on map → Customize router appearance (color, pattern, signal rings) → Save changes → System validates new configuration → Employees see updated network list → Real-time map displays with custom background
+- **Success criteria**: Map image upload (max 5MB) works seamlessly, router positions adjustable on custom maps, network changes reflect immediately in check-in options, validation prevents duplicate SSIDs, clear zone identification with simplified names (-, --, ---)
 
 ### Real-Time Attendance Dashboard with Live Location Map (Admin)
-- **Functionality**: Interactive building map visualization showing live employee positions based on Wi-Fi network connections, with zone filtering and employee clustering
-- **Purpose**: Instant situational awareness of workforce attendance status and physical distribution across locations
+- **Functionality**: Interactive building map visualization showing live employee positions based on Wi-Fi network connections, with zone filtering, employee clustering, custom map image support, and enhanced mobile responsiveness
+- **Purpose**: Instant situational awareness of workforce attendance status and physical distribution across locations, with ability to visualize on actual building floor plans
 - **Trigger**: Admin navigates to dashboard
-- **Progression**: Load dashboard → Display statistics (total/present/absent/late counts) → Render 3-center building map with Wi-Fi router positions → Plot employee positions dynamically → Filter by zone/router → Auto-refresh positions every 3 seconds → Click employee marker for details
-- **Success criteria**: Updates within 5 seconds of check-in, accurate position plotting around routers, smooth animations, zone-based filtering works correctly, employee lists per router show accurate counts
+- **Progression**: Load dashboard → Display statistics (total/present/absent/late counts) → Render 3-center building map (with optional custom background image) → Plot Wi-Fi routers with customizable visual signals → Plot employee positions dynamically with initials and color coding (green=on-time, orange=late) → Filter by zone/router → Auto-refresh positions every 3 seconds → Click employee marker for details → View employee list grouped by router/center
+- **Success criteria**: Updates within 5 seconds of check-in, accurate position plotting around routers, smooth animations, zone-based filtering works correctly, employee lists per router show accurate counts, custom map images display properly, mobile view fully responsive with touch-friendly controls, employee markers show initials clearly
 
 ### AI Task Assignment Engine
 - **Functionality**: Manual task creation with AI suggestions for optimal assignee based on performance history and current workload

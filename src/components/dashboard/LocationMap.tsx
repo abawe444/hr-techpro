@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useKV } from '@github/spark/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { WifiHigh } from '@phosphor-icons/react';
+import { WifiHigh, Image as ImageIcon, Trash } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 import type { Employee, AttendanceRecord, WiFiRouter, EmployeeLocation } from '@/lib/types';
 
 interface LocationMapProps {
@@ -14,6 +16,9 @@ interface LocationMapProps {
 export function LocationMap({ employees, todayAttendance, routers }: LocationMapProps) {
   const [employeeLocations, setEmployeeLocations] = useState<EmployeeLocation[]>([]);
   const [selectedRouter, setSelectedRouter] = useState<string | null>(null);
+  const [mapImage, setMapImage] = useKV<string>('map_background_image', '');
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const presentEmployees = todayAttendance
@@ -78,17 +83,84 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
     ? employeeLocations.filter(loc => loc.wifiNetwork === selectedRouter)
     : employeeLocations;
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('الرجاء اختيار صورة صالحة');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target?.result as string;
+      setMapImage(() => imageData);
+      toast.success('تم تحميل صورة الخريطة بنجاح');
+    };
+    reader.onerror = () => {
+      toast.error('فشل تحميل الصورة');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setMapImage(() => '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    toast.info('تم حذف صورة الخريطة');
+  };
+
   return (
     <div className="space-y-4">
       <Card className="p-4 sm:p-6">
-        <div className="mb-4">
-          <h3 className="text-lg sm:text-xl font-bold mb-2">خريطة المراكز الحية</h3>
-          <p className="text-sm text-muted-foreground">
-            تتبع موقع الموظفين في الوقت الفعلي عبر شبكات الواي فاي
-          </p>
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-lg sm:text-xl font-bold mb-1">خريطة المراكز الحية</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              تتبع موقع الموظفين في الوقت الفعلي عبر شبكات الواي فاي
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              id="map-image-upload"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-shrink-0"
+            >
+              <ImageIcon size={16} className="ml-1" />
+              <span className="hidden sm:inline">رفع خريطة</span>
+              <span className="sm:hidden">خريطة</span>
+            </Button>
+            {mapImage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveImage}
+                className="flex-shrink-0"
+              >
+                <Trash size={16} className="ml-1" />
+                <span className="hidden sm:inline">حذف</span>
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
           <Button
             variant={selectedRouter === null ? 'default' : 'outline'}
             size="sm"
@@ -111,29 +183,46 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
           ))}
         </div>
 
-        <div className="relative bg-muted rounded-lg overflow-hidden" style={{ paddingBottom: '60%' }}>
+        <p className="text-xs text-muted-foreground mb-2 sm:hidden">👆 اضغط على الخريطة لتكبيرها</p>
+
+        <div 
+          className="relative bg-muted rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg" 
+          style={{ paddingBottom: isMapExpanded ? '80%' : '60%' }}
+          onClick={() => setIsMapExpanded(!isMapExpanded)}
+        >
+          {mapImage && (
+            <img 
+              src={mapImage} 
+              alt="خريطة المراكز" 
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 60"
             preserveAspectRatio="xMidYMid meet"
           >
-            <rect x="2" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
-            <rect x="35" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
-            <rect x="68" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
+            {!mapImage && (
+              <>
+                <rect x="2" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
+                <rect x="35" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
+                <rect x="68" y="10" width="30" height="45" fill="oklch(0.95 0.01 80)" stroke="oklch(0.72 0.15 50)" strokeWidth="0.3" rx="1" />
 
-            <line x1="2" y1="15" x2="32" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
-            <line x1="35" y1="15" x2="65" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
-            <line x1="68" y1="15" x2="98" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
+                <line x1="2" y1="15" x2="32" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
+                <line x1="35" y1="15" x2="65" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
+                <line x1="68" y1="15" x2="98" y2="15" stroke="oklch(0.88 0.01 80)" strokeWidth="0.2" />
 
-            <text x="17" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-              المركز الأيسر
-            </text>
-            <text x="50" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-              المركز الأوسط
-            </text>
-            <text x="83" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
-              مركز أمان المحرك
-            </text>
+                <text x="17" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
+                  ---
+                </text>
+                <text x="50" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
+                  --
+                </text>
+                <text x="83" y="12" fontSize="2.5" fill="oklch(0.50 0.02 50)" textAnchor="middle" fontWeight="600">
+                  -
+                </text>
+              </>
+            )}
 
             {routers.map(router => {
               const signalColor = router.signalColor || 'oklch(0.72 0.15 50)';
@@ -198,75 +287,134 @@ export function LocationMap({ employees, todayAttendance, routers }: LocationMap
                       />
                     </>
                   )}
+                  
+                  <text 
+                    x={router.position.x} 
+                    y={router.position.y - router.range - 2} 
+                    fontSize="2.5" 
+                    fill={mapImage ? 'white' : 'oklch(0.09 0.005 286)'} 
+                    textAnchor="middle" 
+                    fontWeight="700"
+                    stroke={mapImage ? 'oklch(0.09 0.005 286)' : 'none'}
+                    strokeWidth={mapImage ? '0.3' : '0'}
+                  >
+                    {router.name}
+                  </text>
                 </g>
               );
             })}
 
-            {filteredLocations.map((location, index) => (
-              <g key={location.employeeId} className="employee-marker">
-                <circle
-                  cx={location.position.x}
-                  cy={location.position.y}
-                  r="2.5"
-                  fill={location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)'}
-                  opacity="0.3"
-                  className="pulse-dot"
-                />
-                <circle
-                  cx={location.position.x}
-                  cy={location.position.y}
-                  r="1.5"
-                  fill={location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)'}
-                />
-                <title>{location.employee.name}</title>
-              </g>
-            ))}
+            {filteredLocations.map((location, index) => {
+              const statusColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
+              const initials = location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+              
+              return (
+                <g key={location.employeeId} className="employee-marker">
+                  <circle
+                    cx={location.position.x}
+                    cy={location.position.y}
+                    r="3.5"
+                    fill={statusColor}
+                    opacity="0.25"
+                    className="pulse-dot"
+                  />
+                  <circle
+                    cx={location.position.x}
+                    cy={location.position.y}
+                    r="2"
+                    fill={statusColor}
+                    stroke="white"
+                    strokeWidth="0.3"
+                  />
+                  <text
+                    x={location.position.x}
+                    y={location.position.y + 0.7}
+                    fontSize="1.2"
+                    fill="white"
+                    textAnchor="middle"
+                    fontWeight="700"
+                  >
+                    {initials}
+                  </text>
+                  <title>{location.employee.name} - {location.employee.department}</title>
+                </g>
+              );
+            })}
           </svg>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-3 bg-success/10 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-success"></div>
-              <span className="text-sm font-semibold">في الوقت المحدد</span>
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="p-3 sm:p-4 bg-success/10 rounded-lg border border-success/20">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
+              <span className="text-xs sm:text-sm font-semibold">في الوقت</span>
             </div>
-            <p className="text-2xl font-bold mt-1">
+            <p className="text-xl sm:text-2xl font-bold text-success">
               {employeeLocations.filter(l => l.status === 'present').length}
             </p>
           </div>
-          <div className="p-3 bg-accent/10 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-accent"></div>
-              <span className="text-sm font-semibold">متأخرون</span>
+          <div className="p-3 sm:p-4 bg-accent/10 rounded-lg border border-accent/20">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-accent"></div>
+              <span className="text-xs sm:text-sm font-semibold">متأخرون</span>
             </div>
-            <p className="text-2xl font-bold mt-1">
+            <p className="text-xl sm:text-2xl font-bold text-accent">
               {employeeLocations.filter(l => l.status === 'late').length}
+            </p>
+          </div>
+          <div className="p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20 col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary"></div>
+              <span className="text-xs sm:text-sm font-semibold">الإجمالي</span>
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-primary">
+              {employeeLocations.length}
             </p>
           </div>
         </div>
 
-        <div className="mt-4">
-          <h4 className="font-semibold mb-2 text-sm">الموظفون الحاليون ({filteredLocations.length})</h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-            {filteredLocations.map(location => (
-              <div
-                key={location.employeeId}
-                className="flex items-center gap-2 p-2 bg-muted rounded-lg"
-              >
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src={location.employee.avatar} />
-                  <AvatarFallback className="text-xs">
-                    {location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold truncate">{location.employee.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{location.employee.department}</p>
-                </div>
-              </div>
-            ))}
+        {filteredLocations.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-semibold mb-3 text-sm sm:text-base flex items-center gap-2">
+              <span>الموظفون الحاليون</span>
+              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                {filteredLocations.length}
+              </span>
+            </h4>
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-h-64 sm:max-h-80 overflow-y-auto p-1">
+              {filteredLocations.map(location => {
+                const ringColor = location.status === 'late' ? 'oklch(0.68 0.17 35)' : 'oklch(0.65 0.18 145)';
+                const bgColor = location.status === 'late' ? 'oklch(0.68 0.17 35 / 0.15)' : 'oklch(0.65 0.18 145 / 0.15)';
+                
+                return (
+                  <div
+                    key={location.employeeId}
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-card border border-border rounded-lg hover:shadow-md transition-all hover:scale-[1.02]"
+                  >
+                    <Avatar className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 ring-2 ring-offset-1 ring-current" style={{ color: ringColor }}>
+                      <AvatarImage src={location.employee.avatar} />
+                      <AvatarFallback className="text-xs sm:text-sm font-bold" style={{
+                        backgroundColor: bgColor,
+                        color: ringColor
+                      }}>
+                        {location.employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-semibold truncate">{location.employee.name}</p>
+                      <div className="flex items-center gap-1 sm:gap-2 mt-0.5">
+                        <WifiHigh size={12} className="flex-shrink-0 text-muted-foreground" />
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                          {routers.find(r => r.ssid === location.wifiNetwork)?.name || location.wifiNetwork}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </Card>
     </div>
   );
