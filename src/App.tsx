@@ -3,7 +3,7 @@ import { useKV } from '@github/spark/hooks';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthForms } from '@/components/auth/AuthForms';
 import { StatsCards } from '@/components/dashboard/StatsCards';
-import { BuildingMap } from '@/components/dashboard/BuildingMap';
+import { LocationMap } from '@/components/dashboard/LocationMap';
 import { AttendanceCheckIn } from '@/components/attendance/AttendanceCheckIn';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -618,7 +618,7 @@ function App() {
             <>
               <TabsContent value="dashboard" className="space-y-4 sm:space-y-6">
                 <StatsCards stats={getStats()} />
-                <BuildingMap employees={employees} todayAttendance={getTodayAttendance()} />
+                <LocationMap employees={employees} todayAttendance={getTodayAttendance()} />
               </TabsContent>
 
               <TabsContent value="analytics" className="space-y-4 sm:space-y-6">

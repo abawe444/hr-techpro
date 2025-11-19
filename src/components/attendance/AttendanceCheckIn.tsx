@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Fingerprint, WifiHigh, Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { isConnectedToApprovedWiFi, requestBiometricAuth, getCurrentTimeString, isLateCheckIn, formatDate, formatTime } from '@/lib/ai-helpers';
+import { requestBiometricAuth, getCurrentTimeString, isLateCheckIn, formatDate, formatTime } from '@/lib/ai-helpers';
 import type { AttendanceRecord, Employee } from '@/lib/types';
 
 interface AttendanceCheckInProps {
@@ -13,20 +15,25 @@ interface AttendanceCheckInProps {
   onCheckOut: (checkOutTime: string) => void;
 }
 
+const WIFI_NETWORKS = [
+  { ssid: 'HR-TechPro-Right', name: 'مركز أمان المحرك', zone: 'right' },
+  { ssid: 'HR-TechPro-Center', name: 'المركز الأوسط', zone: 'center' },
+  { ssid: 'HR-TechPro-Left', name: 'المركز الأيسر', zone: 'left' }
+];
+
 export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onCheckOut }: AttendanceCheckInProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('');
 
   const handleCheckIn = async () => {
+    if (!selectedNetwork) {
+      toast.error('يجب اختيار شبكة الواي فاي المتصل بها');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      const wifiConnected = await isConnectedToApprovedWiFi();
-      if (!wifiConnected) {
-        toast.error('يجب الاتصال بشبكة الواي فاي المعتمدة');
-        setLoading(false);
-        return;
-      }
-
       const biometricSuccess = await requestBiometricAuth();
       if (!biometricSuccess) {
         toast.error('فشلت المصادقة البيومترية');
@@ -36,6 +43,13 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
 
       const checkInTime = getCurrentTimeString();
       const isLate = isLateCheckIn(checkInTime);
+      const network = WIFI_NETWORKS.find(n => n.ssid === selectedNetwork);
+
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.random() * 12;
+      const baseX = network?.zone === 'right' ? 85 : network?.zone === 'center' ? 50 : 15;
+      const x = baseX + Math.cos(angle) * distance;
+      const y = 45 + Math.sin(angle) * distance;
 
       const record: Omit<AttendanceRecord, 'id'> = {
         employeeId: employee.id,
@@ -43,7 +57,13 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
         date: formatDate(new Date()),
         isLate,
         wifiVerified: true,
-        biometricVerified: true
+        biometricVerified: true,
+        wifiNetwork: selectedNetwork,
+        location: {
+          x,
+          y,
+          zone: network?.zone || 'center'
+        }
       };
 
       onCheckIn(record);
@@ -53,7 +73,7 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
           <Check size={20} weight="bold" />
           <div>
             <p className="font-bold">تم تسجيل الحضور بنجاح</p>
-            <p className="text-sm">{formatTime(checkInTime)}</p>
+            <p className="text-sm">{formatTime(checkInTime)} - {network?.name}</p>
           </div>
         </div>
       );
@@ -68,13 +88,6 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
     setLoading(true);
     
     try {
-      const wifiConnected = await isConnectedToApprovedWiFi();
-      if (!wifiConnected) {
-        toast.error('يجب الاتصال بشبكة الواي فاي المعتمدة');
-        setLoading(false);
-        return;
-      }
-
       const biometricSuccess = await requestBiometricAuth();
       if (!biometricSuccess) {
         toast.error('فشلت المصادقة البيومترية');
@@ -109,12 +122,35 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <h3 className="text-lg sm:text-xl font-bold">تسجيل الحضور والانصراف</h3>
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-            <WifiHigh size={16} weight="fill" className="sm:w-5 sm:h-5 text-success" />
-            <span className="hidden sm:inline">متصل بالشبكة المعتمدة</span>
-            <span className="sm:hidden">متصل</span>
-          </div>
+          {selectedNetwork && (
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <WifiHigh size={16} weight="fill" className="sm:w-5 sm:h-5 text-success" />
+              <span className="hidden sm:inline">متصل: {WIFI_NETWORKS.find(n => n.ssid === selectedNetwork)?.name}</span>
+              <span className="sm:hidden">متصل</span>
+            </div>
+          )}
         </div>
+
+        {!hasCheckedIn && (
+          <div className="space-y-2">
+            <Label htmlFor="wifi-network">اختر شبكة الواي فاي المتصل بها</Label>
+            <Select value={selectedNetwork} onValueChange={setSelectedNetwork}>
+              <SelectTrigger id="wifi-network">
+                <SelectValue placeholder="اختر الشبكة..." />
+              </SelectTrigger>
+              <SelectContent>
+                {WIFI_NETWORKS.map(network => (
+                  <SelectItem key={network.ssid} value={network.ssid}>
+                    <div className="flex items-center gap-2">
+                      <WifiHigh size={16} weight="fill" />
+                      {network.name} ({network.ssid})
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {todayAttendance && (
           <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-2">
@@ -122,6 +158,14 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
               <span className="text-xs sm:text-sm text-muted-foreground">وقت الحضور</span>
               <span className="font-bold text-sm sm:text-base">{todayAttendance.checkIn ? formatTime(todayAttendance.checkIn) : '-'}</span>
             </div>
+            {todayAttendance.wifiNetwork && (
+              <div className="flex justify-between items-center">
+                <span className="text-xs sm:text-sm text-muted-foreground">الموقع</span>
+                <span className="font-bold text-sm sm:text-base">
+                  {WIFI_NETWORKS.find(n => n.ssid === todayAttendance.wifiNetwork)?.name || todayAttendance.wifiNetwork}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <span className="text-xs sm:text-sm text-muted-foreground">وقت الانصراف</span>
               <span className="font-bold text-sm sm:text-base">{todayAttendance.checkOut ? formatTime(todayAttendance.checkOut) : '-'}</span>
@@ -140,7 +184,7 @@ export function AttendanceCheckIn({ employee, todayAttendance, onCheckIn, onChec
               size="lg"
               className="gradient-primary text-white hover:opacity-90 h-20 sm:h-24 text-base sm:text-lg font-bold"
               onClick={handleCheckIn}
-              disabled={loading}
+              disabled={loading || !selectedNetwork}
             >
               <div className="flex flex-col items-center gap-2">
                 <Fingerprint size={28} weight="fill" className="sm:w-8 sm:h-8" />

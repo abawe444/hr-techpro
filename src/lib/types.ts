@@ -25,6 +25,12 @@ export interface AttendanceRecord {
   isLate: boolean;
   wifiVerified: boolean;
   biometricVerified: boolean;
+  wifiNetwork?: string;
+  location?: {
+    x: number;
+    y: number;
+    zone: string;
+  };
 }
 
 export interface Task {
@@ -98,4 +104,28 @@ export interface AttendanceStats {
   present: number;
   absent: number;
   late: number;
+}
+
+export interface WiFiRouter {
+  id: string;
+  name: string;
+  ssid: string;
+  zone: 'right' | 'center' | 'left';
+  position: {
+    x: number;
+    y: number;
+  };
+  range: number;
+}
+
+export interface EmployeeLocation {
+  employeeId: string;
+  employee: Employee;
+  position: {
+    x: number;
+    y: number;
+  };
+  wifiNetwork: string;
+  lastUpdate: string;
+  status: 'present' | 'late' | 'absent';
 }
