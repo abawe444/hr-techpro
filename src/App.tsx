@@ -579,13 +579,13 @@ function App() {
                   <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
                     <Bell size={20} className="sm:w-6 sm:h-6" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -left-1 w-4 h-4 sm:w-5 sm:h-5 bg-accent text-white text-xs rounded-full flex items-center justify-center pulse-dot font-bold">
+                      <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-accent text-white text-xs rounded-full flex items-center justify-center pulse-dot font-bold">
                         {unreadCount}
                       </span>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-md" align="end">
+                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-md" align="start">
                   <div className="space-y-4">
                     <h3 className="font-bold text-base sm:text-lg">الإشعارات</h3>
                     <div className="space-y-2 max-h-[60vh] sm:max-h-96 overflow-y-auto">
@@ -634,46 +634,46 @@ function App() {
             {isAdmin && (
               <>
                 <TabsTrigger value="dashboard" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-                  <ChartLine size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <ChartLine size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">لوحة التحكم</span>
                   <span className="sm:hidden">التحكم</span>
                 </TabsTrigger>
                 <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-                  <Lightning size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <Lightning size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">التحليلات الذكية</span>
                   <span className="sm:hidden">التحليلات</span>
                 </TabsTrigger>
                 <TabsTrigger value="wifi" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-                  <WifiHigh size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <WifiHigh size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">شبكات الواي فاي</span>
                   <span className="sm:hidden">الواي فاي</span>
                 </TabsTrigger>
                 <TabsTrigger value="employees" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-                  <UserCircleGear size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                  <UserCircleGear size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">الموظفين</span>
                   <span className="sm:hidden">موظفين</span>
                 </TabsTrigger>
               </>
             )}
             <TabsTrigger value="attendance" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-              <ClockCounterClockwise size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+              <ClockCounterClockwise size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">الحضور</span>
               <span className="sm:hidden">حضور</span>
             </TabsTrigger>
             <TabsTrigger value="tasks" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-              <Check size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+              <Check size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">المهام</span>
               <span className="sm:hidden">مهام</span>
             </TabsTrigger>
             {!isAdmin && (
               <TabsTrigger value="leave" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-                <CalendarBlank size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+                <CalendarBlank size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">الإجازات</span>
                 <span className="sm:hidden">إجازات</span>
               </TabsTrigger>
             )}
             <TabsTrigger value="payroll" className="text-xs sm:text-sm py-2.5 sm:py-2 data-[state=active]:bg-background">
-              <Money size={16} className="ml-1 sm:ml-2 sm:w-5 sm:h-5" />
+              <Money size={16} className="mr-1 sm:mr-2 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">الرواتب</span>
               <span className="sm:hidden">رواتب</span>
             </TabsTrigger>
@@ -804,11 +804,11 @@ function App() {
                           </div>
                           <div className="flex gap-2 w-full sm:w-auto">
                             <Button size="sm" onClick={() => handleApproveEmployee(emp.id)} className="bg-success text-white flex-1 sm:flex-initial">
-                              <Check size={16} className="ml-1" />
+                              <Check size={16} className="mr-1" />
                               موافقة
                             </Button>
                             <Button size="sm" variant="destructive" onClick={() => handleRejectEmployee(emp.id)} className="flex-1 sm:flex-initial">
-                              <X size={16} className="ml-1" />
+                              <X size={16} className="mr-1" />
                               رفض
                             </Button>
                           </div>
@@ -891,7 +891,7 @@ function App() {
             {isAdmin && (
               <div className="flex justify-end">
                 <Button onClick={() => setShowTaskDialog(true)} className="gradient-primary w-full sm:w-auto">
-                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
+                  <Plus size={18} className="mr-2 sm:w-5 sm:h-5" />
                   إنشاء مهمة جديدة
                 </Button>
               </div>
@@ -952,7 +952,7 @@ function App() {
             <TabsContent value="leave" className="space-y-4 sm:space-y-6">
               <div className="flex justify-end">
                 <Button onClick={() => setShowLeaveDialog(true)} className="gradient-primary w-full sm:w-auto">
-                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
+                  <Plus size={18} className="mr-2 sm:w-5 sm:h-5" />
                   طلب إجازة
                 </Button>
               </div>
@@ -994,7 +994,7 @@ function App() {
             {isAdmin && (
               <div className="flex justify-end">
                 <Button onClick={() => setShowPayrollDialog(true)} className="gradient-primary w-full sm:w-auto">
-                  <Plus size={18} className="ml-2 sm:w-5 sm:h-5" />
+                  <Plus size={18} className="mr-2 sm:w-5 sm:h-5" />
                   إضافة مكافأة/خصم
                 </Button>
               </div>
@@ -1018,11 +1018,11 @@ function App() {
                           </div>
                           <div className="flex gap-2 w-full sm:w-auto">
                             <Button size="sm" onClick={() => handleApproveLeave(request.id)} className="bg-success text-white flex-1 sm:flex-initial">
-                              <Check size={16} className="ml-1" />
+                              <Check size={16} className="mr-1" />
                               موافقة
                             </Button>
                             <Button size="sm" variant="destructive" onClick={() => handleRejectLeave(request.id)} className="flex-1 sm:flex-initial">
-                              <X size={16} className="ml-1" />
+                              <X size={16} className="mr-1" />
                               رفض
                             </Button>
                           </div>
